@@ -1,0 +1,25 @@
+canvas{
+	display: block;
+	border: black Thick Solid;
+	top: 50px;
+	width: 1800px;
+	height: 800px;
+	padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: auto;
+	cursor: url(pics/cursor.png), auto;
+}
+
+#wrapper{
+	position: relative;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	width: 1280px;
+	height: 768px;
+}
+
+#gameCanvas{
+	z-index: 1;
+}

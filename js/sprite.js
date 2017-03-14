@@ -73,7 +73,7 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 }
 
 function bloodSpill(origin){
-		
+	
 	var currentPos = origin,
 		size = Math.floor(Math.random() * 3) + 2,
 		targetPos = [currentPos[0] + (Math.random() > .5 ? (Math.random() * 15) + 15: -((Math.random() * 15) + 15)), currentPos[1] + (Math.random() > .5 ? (Math.random() * 15) + 15: -((Math.random() * 15) + 15))],
@@ -90,7 +90,7 @@ function bloodSpill(origin){
 			y = Math.pow((1 - this.currentLife), 2) * currentPos[1] + 2 * (1 - this.currentLife) * this.currentLife * refPoint[1] + Math.pow(this.currentLife, 2) * targetPos[1];
 		
 		currentPos = [x,y];
-		
+
 		Context.fillStyle = 'red';
 		Context.beginPath();
 		Context.arc(currentPos[0], currentPos[1], size, 0, PI2);

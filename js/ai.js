@@ -210,9 +210,9 @@ function rotateWeapon(rot, minMaxRot, dt, rotDir, rotSpeed){
 		}
 	}
 
-	if(Math.random() * .5 >  Math.abs(minMaxRot[0])/Math.abs(rot) && rotDir > 0){
+	if(Math.random() * .75 >  Math.abs(minMaxRot[0])/Math.abs(rot) && rotDir > 0){
 		rotDir *= -1;
-	}else if(Math.random() * .5 > Math.abs(rot)/Math.abs(minMaxRot[1]) && rotDir < 0){
+	}else if(Math.random() * .75 > Math.abs(rot)/Math.abs(minMaxRot[1]) && rotDir < 0){
 		rotDir *= -1;
 	}
 	

@@ -22,7 +22,7 @@ function main(){
 	fpsMeter(Delta);
 	
 	if(tImer > 3){
-		game.allEntities.spawn('monk', game.unitStats.monk);
+		game.allEntities.spawn('monk', game.unitStats.guardsMan);
 		tImer = 0;
 	}
 	tImer += Delta;

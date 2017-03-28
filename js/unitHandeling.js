@@ -77,7 +77,7 @@ function unitStats(){
 					[[0,0], [30,40]],	//weapon - [framPos, size]
 					5,					//dmg
 					100],				//worth
-					[[-PIby2, PIby4], [[-5, 0],[-5, 2]], 7, 25, [30, 'slashWeapon'], 1, 0, true],	//[minMaxRot, minMaxWeap, rotSpeed, thrustSpeed, [preferedDist, cmbtStyle], dir, start]
+					[[-PIby2, PIby4], [[-5, 0],[-5, 2]], 7, 25, [50, 'slashWeapon'], 1, 0, true],	//[minMaxRot, minMaxWeap, rotSpeed, thrustSpeed, [preferedDist, cmbtStyle], dir, start]
 					5,
 					1500
 	];
@@ -107,7 +107,7 @@ function unitStats(){
 						[[40,0], [60,60]],	//weapon - [framPos, size]
 						6,					//dmg
 						150], 				//worth
-						[[PIby8, PIby2], [[-2, 2], [13, 17]], 1, 25, [65, 'stabWeapon'], 1, 0, true],
+						[[PIby8, PIby2], [[-2, 2], [13, 17]], 1, 25, [70, 'stabWeapon'], 1, 0, true],
 						4,
 						1250
 	];
@@ -122,7 +122,7 @@ function unitStats(){
 					[[110,0], [50,50]],	//weapon - [framPos, size]
 					10,					//dmg
 					200], 				//worth
-					[[PIby2, Math.PI], [[-5, -5], [10, 10]], 6, 30, [40, 'slashWeapon'], 1, 0, true],
+					[[PIby2, Math.PI], [[-5, -5], [10, 10]], 6, 30, [50, 'slashWeapon'], 1, 0, true],
 					2,
 					750
 	];
@@ -137,7 +137,7 @@ function unitStats(){
 						[[170,0], [60,60]],	//weapon - [framPos, size]
 						10,					//dmg
 						250], 				//worth
-						[[PIby2, Math.PI], [[5, 5], [10, 10]], 3, 40, [45, 'slashWeapon'], 1, 0, true],
+						[[PIby2, Math.PI], [[5, 5], [10, 10]], 3, 40, [50, 'slashWeapon'], 1, 0, true],
 						1,
 						0
 	];
@@ -152,14 +152,14 @@ function unitStats(){
 					[[240,0], [60,60]],	//weapon - [framPos, size]
 					15,					//dmg
 					300], 				//worth
-					[[PIby8, PIby2], [[-5, -5], [15, 15]], 2, 30, [65, 'stabWeapon'], 1, 0, true],
+					[[PIby8, PIby2], [[-5, -5], [15, 15]], 2, 30, [70, 'stabWeapon'], 1, 0, true],
 					1,
 					0
 	];
 	
 	this.monk = [[imageRepo.imgs[3],
 				[22, 56],
-				[0,0],
+				[0,70],
 				65,
 				40,	
 				'unit',
@@ -167,12 +167,12 @@ function unitStats(){
 				[[0, 70], [50,50]],
 				5,
 				50],
-				[[-PIby4, PIby5], [[5,5], [15,15]], 3, 25, [50, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false] 
+				[[-PIby4, PIby5], [[5,5], [15,15]], 3, 25, [55, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false] 
 	];
 	
 	this.guardsMan = [[imageRepo.imgs[3],
 				[26, 58],
-				[57,0],
+				[57,70],
 				75,
 				35,
 				'unit',
@@ -180,12 +180,12 @@ function unitStats(){
 				[[40,0], [60,60]],
 				8,
 				50],
-				[[-PIby8, PIby2], [[20, 2], [25, 17]], 2, 25, [55, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false] 
+				[[-PIby8, PIby2], [[20, 2], [25, 17]], 2, 25, [65, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false] 
 	];
 	
 	this.zealot = [[imageRepo.imgs[3],
 				[22, 56],
-				[91,0],
+				[91,70],
 				70,
 				40,
 				'unit',
@@ -198,7 +198,7 @@ function unitStats(){
 
 	this.crusader = [[imageRepo.imgs[3],
 				[26, 60],
-				[27,0],
+				[27,70],
 				85,
 				35,
 				'unit',

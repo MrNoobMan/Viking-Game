@@ -59,8 +59,8 @@ function updateAll(dt, entities){
 					}
 				}
 				if(entities[x][i].dying){
-					var updateStatus = entities[x][i].ai.animateDeath(dt, entities[x][i].currentPos, entities[x][i].rot, entities[x][i].weaponRot, entities[x][i].alpha);
-					if(updateStatus[4]){
+					var updateStatus = entities[x][i].ai.animateDeath(dt, entities[x][i].currentPos, entities[x][i].rot, entities[x][i].alpha);
+					if(updateStatus[3]){
 						entities[x][i].alive = false;
 						entities[x].splice(i, 1);
 						i--;
@@ -68,8 +68,7 @@ function updateAll(dt, entities){
 					}else{
 						entities[x][i].currentPos = updateStatus[0];
 						entities[x][i].rot = updateStatus[1];
-						entities[x][i].weaponRot = updateStatus[2];
-						entities[x][i].alpha = updateStatus[3];
+						entities[x][i].alpha = updateStatus[2];
 					}
 				}
 			}else if(entities[x][i].type === 'projectile'){
@@ -136,11 +135,13 @@ function renderAll(dt, entities){
 		if(entities[i].alive){
 			if(entities[i].type === 'unit'){
 				Context.save();
+				//makeCross(entities[i].currentPos[0], entities[i].currentPos[1]);
 				Context.translate(entities[i].currentPos[0], entities[i].currentPos[1]);
 				if(entities[i].dying){
 					Context.globalAlpha = entities[i].alpha;
 					Context.rotate(entities[i].rot);
 				}
+				Context.translate(-entities[i].size[0]/2, -entities[i].size[1]);
 				entities[i].draw(Context);
 				entities[i].drawWeapon();
 				Context.restore();
@@ -261,7 +262,7 @@ function renderBg(){
 
 function generateLandscape(maxSteepness, stepSize, maxHeigth, minHeigth, colour, pushPath, grdHeigth){
 
-	const pathHeigth = 35;
+	const pathHeigth = 75;
 	
 	var attitude = (Math.random() * (minHeigth - maxHeigth)) + maxHeigth,
 		slope =  (Math.random() * maxSteepness) * 2 - maxSteepness;

@@ -56,7 +56,6 @@ function handleUI(){
 	};
 	
 	this.draw = function(dt){
-		var Delta = dt;
 		
 		Context.save();
 		Context.fillStyle = '#cc6d00';

@@ -11,26 +11,29 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 		target = 'none',
 		rndAng,
 		isWindingUp = true,
-		allegiance = aiParams[7];
-		this.pos = game.renderBg.slopePath[posOnPath];
-		
-	if(aiParams[4][1] == 'shootBow'){
-		aiParams[4][0] += Math.random() > .5 ? Math.random() * 25 : -Math.random() * 25;
-	}
-
-	this.animate = function(dt, speed, rot, weaponPos, inCombat, dmg){
-		isFigthing = inCombat;
+		prefDist = aiParams[4][0] + (Math.random() > .5 ? Math.random() * aiParams[4][0] * .06 : -Math.random() * aiParams[4][0] * .06),
+		allegiance = aiParams[7],
+		maxRot = walkDir > 0 ? PIby4 * Math.random() + PIby4 : -(PIby4 * Math.random() + PIby4),
+		stepSize = .2,
+		slope = (Math.random() * stepSize) * 2 - stepSize,
+		maxSteepness = 1,
+		maximumHeigth = Canvas.height*7/8;
+		rndHeigth = Math.random() * (maximumHeigth - game.renderBg.slopePath[posOnPath][1]) + game.renderBg.slopePath[posOnPath][1];
+		this.pos = [game.renderBg.slopePath[posOnPath][0], rndHeigth];
 		this.dead = false;
+		
+	this.animate = function(dt, speed, rot, weaponPos, inCombat, dmg){		
+		isFigthing = inCombat;
 		this.rot = rot;
 		this.weaponPos = weaponPos;
 		
 		if(typeof target === 'undefined' || target.currentHealth <= 0){
-				target.alive = false;
+				target.dying = true;
 				isFigthing = false;
 				targetFound = false;
 				isWindingUp = true;
 				target = 'none';
-			}
+		}
 
 		if(!isFigthing){
 			
@@ -38,50 +41,72 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 
 			if(!targetFound){
 				
-				if(walkDir > 0){
-					if(posOnPath < game.renderBg.slopePath.length){
-						truePosOnPath += speed * dt * walkDir * ((Math.random() * .5) + .5);
-						posOnPath = Math.round(truePosOnPath);
-					
-						this.pos = game.renderBg.slopePath[posOnPath];
-					}
-					if(posOnPath >= game.renderBg.slopePath.length){
-						posOnPath = 0;
-						truePosOnPath = 0;
-						this.dead = true;
-						return [0, true];
-					}
-				}else if(walkDir < 0){
-					if(posOnPath > 0){
-					truePosOnPath += speed * dt * walkDir;
-					posOnPath = Math.round(truePosOnPath);
+				var moveX = dt * speed * walkDir * ((Math.random() *  .5) + .5);
+				truePosOnPath += moveX;
+				posOnPath = Math.round(truePosOnPath);
+				this.pos[0] += moveX;
+
+				if(walkDir > 0 && this.pos[0] > Canvas.width + 29){
+					return [this.pos, true];
+				}else if(walkDir < 0 && this.pos[0] < -29){
+					return [this.pos, true];
+				}
+
+				this.pos[1] += slope;
+				slope += (Math.random() * stepSize) * 2 * dt * fps - stepSize;
 				
-					this.pos = game.renderBg.slopePath[posOnPath];
-					}
-					if(posOnPath <= 0){
-						posOnPath = 0;
-						truePosOnPath = 0;
-						this.dead = true;
-						return [0, true];
-					}
+				if(slope > maxSteepness){
+					slope = stepSize;
+				}else if(slope < -maxSteepness){
+					slope = -stepSize;
+				};
+				
+				if(this.pos[1] < game.renderBg.slopePath[posOnPath][1]){
+					this.pos[1] = game.renderBg.slopePath[posOnPath][1];
+					stepSize *= -1;
+				}else if(this.pos[1] > maximumHeigth){
+					this.pos[1] = maximumHeigth;
+					stepSize *= -1;
 				}
 				if(target != 'none' && typeof target != 'undefined'){
 					targetFound = true;
-				}
+				};
+				/*if(walkDir > 0){
+					if(posOnPath < game.renderBg.slopePath.length - 1){
+						truePosOnPath += speed * dt * walkDir * ((Math.random() * .5) + .5);
+						posOnPath = Math.round(truePosOnPath);
+					
+					}
+					if(posOnPath >= game.renderBg.slopePath.length - 1){
+						this.dead = true;
+						return [this.pos, true];
+					}
+					this.pos = [game.renderBg.slopePath[posOnPath][0], game.renderBg.slopePath[posOnPath][1] + rndHeigth];
+				}else if(walkDir < 0){
+					if(posOnPath > 1){
+						truePosOnPath += speed * dt * walkDir;
+						posOnPath = Math.round(truePosOnPath);
+					}
+					if(posOnPath <= 1){
+						this.dead = true;
+						return [this.pos, true];
+					}
+					this.pos = [game.renderBg.slopePath[posOnPath][0], game.renderBg.slopePath[posOnPath][1] + rndHeigth];
+				}*/
 			}else if(targetFound && target != 'none' && typeof target != 'undefined'){
-				if(walkDir > 0 && this.pos[0] < target.currentPos[0] - aiParams[4][0] + (Math.random() * 5 - Math.random() * 5)){
+				/*if(walkDir > 0 && this.pos[0] < target.currentPos[0] - prefDist){
 					truePosOnPath += speed * dt * walkDir;
 					posOnPath = Math.round(truePosOnPath);
 				
-					this.pos = game.renderBg.slopePath[posOnPath];
-				}else if(walkDir < 0 && this.pos[0] > target.currentPos[0] + aiParams[4][0] + (Math.random() * 5 - Math.random() * 5)){
+					this.pos = [game.renderBg.slopePath[posOnPath][0], game.renderBg.slopePath[posOnPath][1] + rndHeigth];
+				}else if(walkDir < 0 && this.pos[0] > target.currentPos[0] + prefDist){
 					truePosOnPath += speed * dt * walkDir;
 					posOnPath = Math.round(truePosOnPath);
 
-					this.pos = game.renderBg.slopePath[posOnPath];
+					this.pos = [game.renderBg.slopePath[posOnPath][0], game.renderBg.slopePath[posOnPath][1] + rndHeigth];
 				}else{
 					isFigthing = true;
-				}
+				}*/
 			}
 						
 			var rotResult = rotateWeapon(this.rot, aiParams[0], dt, rotDir, aiParams[2]);
@@ -98,17 +123,36 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 			isWindingUp = weapResult[2];
 			rndAng = weapResult[3];
 		}
-				
+		
 		return [this.pos, this.dead, this.rot, this.weaponPos, isFigthing];
-	}
+	};
+	
+	this.animateDeath = function(dt, pos, rot, weapRot, alpha){
+		
+		alpha -= dt/2;
+
+		if(alpha <= 0){
+			alpha = 0;
+			return [null, null, null, null, true];
+		}
+		if(walkDir > 0 && rot <= maxRot){
+			rot += dt/2;
+		}else if(walkDir < 0 && rot >= maxRot){
+			rot -= dt/2;	
+		}
+		weapRot += dt/3 * walkDir;
+		pos[1] += dt * 70;
+		return [pos, rot, weapRot, alpha, false];
+	};
 	
 }
 
 function arrowAi(originPos, targetPos, thisSize){
 	
-	var leeWay = Math.random() > .5 ? Math.random() * 25 : Math.random() * -50,
+	var leeWayX = Math.random() > .5 ? Math.random() * 50 : Math.random() * -50,
+		leeWayY = Math.random() > .5 ? Math.random() * 25 : Math.random() * -25,
 		p_0 = originPos,
-		p_1 = [targetPos[0], targetPos[1] + leeWay],
+		p_1 = [targetPos[0] + leeWayX, targetPos[1] + leeWayY],
 		dir = originPos[0] > targetPos[0] ? 1 : -1,
 		p_2 = [(p_0[0] + p_1[0])/2, (p_0[1] + p_1[1])/2 + dir * (p_1[0] - p_0[0])*3/4],
 		prevPos = originPos,
@@ -117,52 +161,93 @@ function arrowAi(originPos, targetPos, thisSize){
 		dead = false,
 		point = originPos,
 		dist = Math.abs(p_0[0] - p_1[0]),
-		box = 3;
+		box = 3,
+		depth = Math.random() * 10 + 30,
+		rot,
+		angle,
+		len,
+		xDiff = 0,
+		yDiff = 0,
+		attatchedTarget = {};
 
+	this.stuck = false;
+		
 	this.animate = function(dt){
 		
-		prevPos = currentPos;
+		if(!this.stuck){
+			prevPos = currentPos;
 
-		posT += dt*200/((dist/1.5) + 0.5); //dt * 3/4
+			posT += dt*200/((dist/1.5) + 0.5);
 
-		var x = Math.pow((1 - posT), 2) * p_0[0] + 2 * (1 - posT) * posT * p_2[0] + Math.pow(posT, 2) * p_1[0],
-			y = Math.pow((1 - posT), 2) * p_0[1] + 2 * (1 - posT) * posT * p_2[1] + Math.pow(posT, 2) * p_1[1];
+			var x = Math.pow((1 - posT), 2) * p_0[0] + 2 * (1 - posT) * posT * p_2[0] + Math.pow(posT, 2) * p_1[0],
+				y = Math.pow((1 - posT), 2) * p_0[1] + 2 * (1 - posT) * posT * p_2[1] + Math.pow(posT, 2) * p_1[1];
+		
+			currentPos = [x, y];
+
+			if(typeof game.renderBg.slopePath[Math.round(x + depth)] === 'undefined' || y > game.renderBg.slopePath[Math.round(x + depth)][1]+depth){
+				return [currentPos, true];
+			}
+			
+			rot = Math.atan2(currentPos[1] - prevPos[1], currentPos[0] - prevPos[0]) + PI3by4;
+			angle = rot + Math.atan((thisSize[1]/2)/(thisSize[0]/2)) + Math.PI;
+			len = Math.sqrt(Math.pow((thisSize[1]/2),2) + Math.pow((thisSize[0]/2),2));
+			
+			point = [
+					(currentPos[0]) + Math.cos(angle) * len,
+					(currentPos[1]) + Math.sin(angle) * len
+					];
+		}else{
+			currentPos[0] = attatchedTarget.currentPos[0] - xDiff;
+			currentPos[1] = attatchedTarget.currentPos[1] - yDiff;
+		}
+				
+		return [currentPos, dead, rot, point];
+	};
 	
-		currentPos = [x, y];
+	this.animateDeath = function(dt, alpha){
+		
+		alpha -= dt/2;
 
-		if(typeof game.renderBg.slopePath[Math.round(x + 30)] === 'undefined' || y > game.renderBg.slopePath[Math.round(x + 30)][1]+25){
-			return [currentPos, true];
+		if(alpha <= 0){
+			return [null, null, null, true];
+		}
+		if(this.stuck){
+			if(typeof attatchedTarget.currentPos != 'undefined' && attatchedTarget.currentHealth > 0){
+				currentPos[0] = attatchedTarget.currentPos[0] - xDiff;
+				currentPos[1] = attatchedTarget.currentPos[1] - yDiff;
+			}else{
+				currentPos[1] += dt * 100;
+				if(rot > 0 && rot < Math.PI + PIby4){
+					rot += dt/5;
+				}else if(rot < 0 && rot > -PI3by4){
+					rot -= dt/5;
+				}
+			}
 		}
 		
-		var rot = Math.atan2(currentPos[1] - prevPos[1], currentPos[0] - prevPos[0]) + PI3by4,
-			angle = rot + Math.atan((thisSize[1]/2)/(thisSize[0]/2)) + Math.PI,
-			len = Math.sqrt(Math.pow((thisSize[1]/2),2) + Math.pow((thisSize[0]/2),2));
-		
-		point = [
-				(currentPos[0]) + Math.cos(angle) * len,
-				(currentPos[1]) + Math.sin(angle) * len
-				];
-
-		return [currentPos, dead, rot, point];
+		return [alpha, currentPos, rot, false];
 	};
 
 	this.checkCollision = function(target){
 		if(typeof target === 'undefined'){
 			return false;
 		}else if(point[0] + box >= target.currentPos[0] &&
-				point[0] - box <= target.currentPos[0] + target.size[0] &&
+				point[0] - box <= target.currentPos[0] &&
 				point[1] + box >= target.currentPos[1] &&
-				point[1] - box <= target.currentPos[1] + target.size[1]){
-			let rndTing = Math.floor(Math.random() * 2) + 1;
+				point[1] - box <= target.currentPos[1]){
+			let rndTing = Math.floor(Math.random() * 4) + 2;
 			for(var i = 0; i < rndTing; i++){
 				game.allEntities.spillBlood(point);
 			}
+			this.stuck = true;
+			xDiff = Math.abs(currentPos[0] - target.currentPos[0]);
+			yDiff = Math.abs(currentPos[1] - target.currentPos[1]);
+			attatchedTarget = target;
 			return true;
 		}else{
 			return false;
 		}
-	}
-	
+	};
 }
 
 function findTarget(position, Friend){
@@ -173,7 +258,7 @@ function findTarget(position, Friend){
 	if(Friend){	//true = buddy
 		for(var i = 0; i < game.allEntities.enemyUnits.length; i++){
 			var checkedDist = game.allEntities.enemyUnits[i].currentPos[0] - position[0];
-			if(checkedDist <= distance && position[0] < game.allEntities.enemyUnits[i].currentPos[0]){
+			if(!game.allEntities.enemyUnits[i].dying && checkedDist <= distance && position[0] < game.allEntities.enemyUnits[i].currentPos[0]){
 				distance = checkedDist;
 				target = game.allEntities.enemyUnits[i];
 			}
@@ -182,7 +267,7 @@ function findTarget(position, Friend){
 	}else if(!Friend){	//false = not buddy
 		for(var i = 0; i < game.allEntities.playerUnits.length; i++){
 			var checkedDist = position[0] - game.allEntities.playerUnits[i].currentPos[0];
-			if(checkedDist <= distance && position[0] > game.allEntities.playerUnits[i].currentPos[0]){
+			if(!game.allEntities.playerUnits[i].dying && checkedDist <= distance && position[0] > game.allEntities.playerUnits[i].currentPos[0]){
 				distance = checkedDist;
 				target = game.allEntities.playerUnits[i];
 			}
@@ -247,14 +332,14 @@ function thrustWeapon(weaponPos, weapDir, minMaxWep, dt, thrustSpeed){
 		}
 	}
 	
-	if(Math.random() * .5 > Math.abs(minMaxWep[0][0])/Math.abs(weaponPos[0]) && weapDir[0] > 0){
+	if(Math.random() * dt * .5 > Math.abs(minMaxWep[0][0])/Math.abs(weaponPos[0]) && weapDir[0] > 0){
 		weapDir[0] *= -1;
-	}else if(Math.random() * .5 > Math.abs(weaponPos[0])/Math.abs(minMaxWep[0][0]) && weapDir[0] < 0){
+	}else if(Math.random() * dt * .5 > Math.abs(weaponPos[0])/Math.abs(minMaxWep[1][0]) && weapDir[0] < 0){
 		weapDir[0] *= -1;
 	}
-	if(Math.random() * .5 > Math.abs(minMaxWep[0][1])/Math.abs(weaponPos[1]) && weapDir[1] > 0){
+	if(Math.random() * dt * .5 > Math.abs(minMaxWep[0][1])/Math.abs(weaponPos[1]) && weapDir[1] > 0){
 		weapDir[1] *= -1;
-	}else if(Math.random() * .5 > Math.abs(weaponPos[1])/Math.abs(minMaxWep[0][1]) && weapDir[1] < 0){
+	}else if(Math.random() * dt * .5 > Math.abs(weaponPos[1])/Math.abs(minMaxWep[1][1]) && weapDir[1] < 0){
 		weapDir[1] *= -1;
 	}
 		
@@ -291,7 +376,7 @@ function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWin
 				if(typeof target != 'undefined'){
 					let rndTing = Math.floor(Math.random() * 2) + 1;
 					for(var i = 0; i < rndTing; i++){
-						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]), target.currentPos[1] + (Math.random() * (target.size[1]/2))]);
+						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]), target.currentPos[1] - (Math.random() * (target.size[1]/3) + target.size[1]/3)]);
 					}
 					target.currentHealth -= dmg;
 				}
@@ -306,7 +391,7 @@ function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWin
 				if(typeof target != 'undefined'){
 					let rndTing = Math.floor(Math.random() * 2) + 1;
 					for(var i = 0; i < rndTing; i++){
-						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]), target.currentPos[1] + (Math.random() * (target.size[1]/2))]);
+						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]), target.currentPos[1] - (Math.random() * (target.size[1]/3)) + target.size[1]/3]);
 					}
 					target.currentHealth -= dmg;
 				}
@@ -360,7 +445,7 @@ function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWind
 			if(typeof target != 'undefined'){
 				let rndTing = Math.floor(Math.random() * 2) + 1;
 				for(var i = 0; i < rndTing; i++){
-					game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]), target.currentPos[1] + (Math.random() * (target.size[1]/2))]);
+					game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]), target.currentPos[1] - (Math.random() * (target.size[1]/3) + target.size[1]/3)]);
 				}
 				target.currentHealth -= dmg;
 			}
@@ -403,10 +488,10 @@ function shootBow(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindin
 		
 		}
 	}else{
-		game.allEntities.fire('playerArrow', game.unitStats.friendlyArrow, dmg, [thisPos, target.currentPos]);
+		game.allEntities.fire('playerArrow', game.unitStats.friendlyArrow, dmg, [[thisPos[0]-10, thisPos[1]-20], target.currentPos]);
 		weaponPos = [20, 30];
 		isWindingUp = true;
 	}
-	
+
 	return [weaponPos, rot, isWindingUp];
 }

@@ -34,16 +34,19 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 	this.framePos = unitParams[2];
 	this.maxHealth = unitParams[3];
 	this.speed = unitParams[4];
-	this.type = unitParams[5]; //viking, structure, priest, projectile
+	this.type = unitParams[5]; //unit, structure, projectile
 	this.allegiance = unitParams[6]; //player, monks, other?
 	this.weapon =  unitParams[7];	//[framPos, size]
-	this.dmg = unitParams[8];
+	this.dmg = unitParams[8];		
 	this.worth = unitParams[9];
 	this.alive = false;
 	this.currentHealth = 0;
 	this.isFigthing = false;
+	this.dying = false;
+	this.rot = 0;
+	this.alpha = 1;
 	
-	this.rot = Math.random() * Math.PI/2;
+	this.weaponRot = Math.random() * Math.PI/2;
 	this.weaponPos = [0,0];
 	
 	this.unUsed = true;
@@ -64,7 +67,7 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 	this.drawWeapon = function(){
 		Context.save();
 		Context.translate(this.size[0]/4, this.size[1]/2);
-		Context.rotate(this.rot);
+		Context.rotate(this.weaponRot);
 		Context.translate(this.weaponPos[0], this.weaponPos[1]);
 		Context.drawImage(imageRepo.imgs[2], this.weapon[0][0], this.weapon[0][1], this.weapon[1][0], this.weapon[1][1], -this.weapon[1][0], -this.weapon[1][1], this.weapon[1][0], this.weapon[1][1]);
 		Context.restore();
@@ -90,10 +93,10 @@ function bloodSpill(origin){
 			y = Math.pow((1 - this.currentLife), 2) * currentPos[1] + 2 * (1 - this.currentLife) * this.currentLife * refPoint[1] + Math.pow(this.currentLife, 2) * targetPos[1];
 		
 		currentPos = [x,y];
-
+		
 		Context.fillStyle = 'red';
 		Context.beginPath();
-		Context.arc(currentPos[0], currentPos[1], size, 0, PI2);
+		Context.arc(x, y, size, 0, PI2);
 		Context.fill();
 		size -= dt;
 	}

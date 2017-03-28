@@ -1,6 +1,8 @@
 
 var lastTimeCalled = Date.now(),
-	numLoaded = 0;
+	numLoaded = 0,
+	themMonks = [],
+	themVikings = [];
 	
 var tImer = 0;
 	
@@ -21,8 +23,9 @@ function main(){
 		
 	fpsMeter(Delta);
 	
-	if(tImer > 3){
-		game.allEntities.spawn('monk', game.unitStats.guardsMan);
+	if(tImer > 1){
+		game.allEntities.spawn('monk', themMonks[Math.floor(Math.random() * themMonks.length)]);
+		game.allEntities.spawn('player', themVikings[Math.floor(Math.random() * themVikings.length)]);
 		tImer = 0;
 	}
 	tImer += Delta;
@@ -37,87 +40,131 @@ function updateAll(dt, entities){
 		
 		while(i > -1){
 			
-			if(entities[x][i].currentHealth <= 0){
-				entities[x][i].alive = false;
-				entities[x].splice(i, 1);
-			}else if(entities[x][i].type != 'projectile'){
-				var updateStatus = entities[x][i].ai.animate(dt, entities[x][i].speed, entities[x][i].rot, entities[x][i].weaponPos, entities[x][i].isFigthing, entities[x][i].dmg);
-				if(updateStatus[1]){
-					entities[x][i].alive = false;
-					entities[x].splice(i, 1);
-				}else{
-					entities[x][i].currentPos = updateStatus[0];
-					entities[x][i].rot = updateStatus[2];
-					entities[x][i].weaponPos = updateStatus[3];
-					entities[x][i].isFigthing = updateStatus[4];
+			if(entities[x][i].type === 'unit'){
+
+				if(entities[x][i].currentHealth <= 0 && !entities[x][i].dying && entities[x][i].alive){
+					entities[x][i].dying = true;
+				}else if(!entities[x][i].dying && entities[x][i].alive){
+					var updateStatus = entities[x][i].ai.animate(dt, entities[x][i].speed, entities[x][i].weaponRot, entities[x][i].weaponPos, entities[x][i].isFigthing, entities[x][i].dmg);
+					if(updateStatus[1]){
+						entities[x][i].alive = false;
+						entities[x].splice(i, 1);
+						i--;
+						continue;
+					}else{
+						entities[x][i].currentPos = updateStatus[0];
+						entities[x][i].weaponRot = updateStatus[2];
+						entities[x][i].weaponPos = updateStatus[3];
+						entities[x][i].isFigthing = updateStatus[4];
+					}
 				}
-			}else if(entities[x][i].type == 'projectile'){
-				var updateStatus = entities[x][i].ai.animate(dt);
-				if(updateStatus[1]){
-					entities[x][i].alive = false;
-					entities[x].splice(i, 1);
-				}else{
-					entities[x][i].currentPos = updateStatus[0];
-					entities[x][i].rot = updateStatus[2];
-					entities[x][i].point = updateStatus[3];
-					if(entities[x][i].allegiance == 'player' && entities[x][i].unUsed){
-						for(var y = 0; y < entities[1].length; y++){
-							if(entities[x][i].ai.checkCollision(entities[1][y])){
-								entities[1][y].currentHealth -= entities[x][i].dmg;
-								entities[x][i].dmg = 0;
-								entities[x][i].unUsed = false;
-								break;
+				if(entities[x][i].dying){
+					var updateStatus = entities[x][i].ai.animateDeath(dt, entities[x][i].currentPos, entities[x][i].rot, entities[x][i].weaponRot, entities[x][i].alpha);
+					if(updateStatus[4]){
+						entities[x][i].alive = false;
+						entities[x].splice(i, 1);
+						i--;
+						continue;
+					}else{
+						entities[x][i].currentPos = updateStatus[0];
+						entities[x][i].rot = updateStatus[1];
+						entities[x][i].weaponRot = updateStatus[2];
+						entities[x][i].alpha = updateStatus[3];
+					}
+				}
+			}else if(entities[x][i].type === 'projectile'){
+				if(!entities[x][i].dying){
+					var updateStatus = entities[x][i].ai.animate(dt);
+					if(updateStatus[1]){
+						entities[x][i].dying = true;
+					}else{
+						entities[x][i].currentPos = updateStatus[0];
+						entities[x][i].rot = updateStatus[2];
+						entities[x][i].point = updateStatus[3];
+						if(entities[x][i].unUsed && entities[x][i].allegiance === 'player'){
+							for(var y = 0; y < entities[1].length; y++){
+								if(!entities[1][y].dying){
+									if(entities[x][i].ai.checkCollision(entities[1][y])){
+										entities[1][y].currentHealth -= entities[x][i].dmg;
+										entities[x][i].dmg = 0;
+										entities[x][i].unUsed = false;
+										entities[x][i].dying = true;
+										break;
+									}
+								}
 							}
 						}
+					}
+				}else{
+					var updateStatus = entities[x][i].ai.animateDeath(dt, entities[x][i].alpha);
+					if(updateStatus[3]){
+						entities[x][i].alive = false;
+						entities[x].splice(i, 1);
+						i--;
+						continue;
+					}else{
+						entities[x][i].alpha = updateStatus[0];
+						entities[x][i].currentPos = updateStatus[1];
+						entities[x][i].rot = updateStatus[2];
 					}
 				}
 			}
 			i--;
 		}
 	}
-
+	
 	game.handleUI.updateUi(dt);
 
-	return entities;
+	return game.allEntities.aliveUnits.filter(removeDead);
 }
 
 function renderAll(dt, entities){
 	
 	game.renderBg.drawBg();
 
-	for(var x = 0; x < entities.length; x++){
-		for(var i = 0; i < entities[x].length; i++){
-			if(entities[x][i].alive){
-				if(entities[x][i].type != 'projectile'){
-					Context.save();
-					Context.translate(entities[x][i].currentPos[0]-entities[x][i].size[0]/2, entities[x][i].currentPos[1]-entities[x][i].size[0]);
-					entities[x][i].draw(Context);
-					entities[x][i].drawWeapon();
-					Context.restore();
-				}else{
-					Context.save();
-					Context.translate(entities[x][i].currentPos[0], entities[x][i].currentPos[1]);
-					Context.rotate(entities[x][i].rot);
-					Context.translate(-entities[x][i].size[0]/2, -entities[x][i].size[1]/2);
-					entities[x][i].draw(Context);					
-					Context.restore();
-
-					//Context.fillRect(entities[x][i].point[0] - 3, entities[x][i].point[1] - 3, 6, 6);
-					//makeCross(entities[x][i].point[0], entities[x][i].point[1])
-					
-					//makeCross(entities[x][i].currentPos[0], entities[x][i].currentPos[1]);
+	entities.sort(function(a, b){
+		if(a.type === 'projectile'){
+			return 1;
+		}else if(b.type === 'projectile'){
+			return -1;
+		}else{
+			return a.currentPos[1] - b.currentPos[1];
+		}
+	});
+	
+	for(var i = 0; i < entities.length; i++){
+		if(entities[i].alive){
+			if(entities[i].type === 'unit'){
+				Context.save();
+				Context.translate(entities[i].currentPos[0], entities[i].currentPos[1]);
+				if(entities[i].dying){
+					Context.globalAlpha = entities[i].alpha;
+					Context.rotate(entities[i].rot);
 				}
+				entities[i].draw(Context);
+				entities[i].drawWeapon();
+				Context.restore();
+			}else if(entities[i].type === 'projectile'){
+				Context.save();
+				Context.globalAlpha = entities[i].alpha;
+				Context.translate(entities[i].currentPos[0], entities[i].currentPos[1]);
+				Context.rotate(entities[i].rot);
+				Context.translate(-entities[i].size[0]/2, -entities[i].size[1]/2);
+				entities[i].draw(Context);					
+				Context.restore();
+
+				//Context.fillRect(entities[x][i].point[0] - 3, entities[x][i].point[1] - 3, 6, 6);
+				//makeCross(entities[x][i].point[0], entities[x][i].point[1])
+
+				//makeCross(entities[x][i].currentPos[0], entities[x][i].currentPos[1]);
 			}
 		}
 	}
+
 	
 	for(var i = 0; i < game.allEntities.bloodDrops.length; i++){
 		game.allEntities.bloodDrops[i].animate(dt);
 	}
-	
-	//bezier(dt);
-
-	//spurtBlood();
 	
 	game.handleUI.draw(dt);
 }
@@ -189,9 +236,9 @@ function renderBg(){
 		Context.fillStyle = '#00cee0';
 		Context.fillRect(0,0,Canvas.width, Canvas.height);
 
-		generateLandscape(4, 1, Canvas.height/4, Canvas.height/2, '#2b4d00', false, 30); 
-		generateLandscape(3, .5, Canvas.height*2/5, Canvas.height*2/3, '#518000', false, 50);
-		generateLandscape(1.5, .2, Canvas.height*3/7, Canvas.height * 5/6, '#16e000', true, 100);
+		generateLandscape(4, 1, Canvas.height/7, Canvas.height/3, '#2b4d00', false, 30); 
+		generateLandscape(3, .5, Canvas.height/5, Canvas.height*2/3, '#518000', false, 50);
+		generateLandscape(1.5, .2, Canvas.height/4, Canvas.height/2, '#16e000', true, 100);
 
 		/*Context.strokeStyle = '#fff';
 		Context.beginPath();
@@ -214,7 +261,7 @@ function renderBg(){
 
 function generateLandscape(maxSteepness, stepSize, maxHeigth, minHeigth, colour, pushPath, grdHeigth){
 
-	const pathHeigth = 20;
+	const pathHeigth = 35;
 	
 	var attitude = (Math.random() * (minHeigth - maxHeigth)) + maxHeigth,
 		slope =  (Math.random() * maxSteepness) * 2 - maxSteepness;
@@ -225,7 +272,7 @@ function generateLandscape(maxSteepness, stepSize, maxHeigth, minHeigth, colour,
 	Context.lineTo(0, attitude);
 	
 	for(var i = -30; i <= 0; i++){
-	game.renderBg.slopePath.push([i, attitude + pathHeigth]);
+		game.renderBg.slopePath.push([i, attitude + pathHeigth]);
 	}
 
 	for(var x = 1; x <= Canvas.width + 30; x++){
@@ -290,6 +337,9 @@ function Game(){
 		this.unitStats = new unitStats();
 		
 		this.handleUI.init();
+	
+		themMonks = [this.unitStats.monk, this.unitStats.guardsMan, this.unitStats.crusader, this.unitStats.zealot];
+		themVikings = [this.unitStats.axeViking, this.unitStats.spearViking, this.unitStats.bowViking, this.unitStats.bearserker, this.unitStats.swordViking, this.unitStats.valkyrie];
 		
 		main();
 	};

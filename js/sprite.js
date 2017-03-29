@@ -45,8 +45,12 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 	this.dying = false;
 	this.rot = 0;
 	this.alpha = 1;
+	this.walkDir = 1;
 	
-	this.weaponRot = Math.random() * Math.PI/2;
+	var frameMod = 0,
+		wFrameMod = 0;
+	
+	this.weaponRot = 0;
 	this.weaponPos = [0,0];
 	
 	this.unUsed = true;
@@ -61,15 +65,36 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 	};
 
 	this.draw = function(Context){
-		Context.drawImage(this.img, this.framePos[0], this.framePos[1], this.size[0], this.size[1], 0,0, this.size[0], this.size[1]);
-	};
 		
+		if(this.walkDir > 0){
+			frameMod = 0;
+		}else if(this.walkDir < 0){
+			frameMod = 70;
+		}
+		Context.drawImage(this.img, this.framePos[0], this.framePos[1] + frameMod, this.size[0], this.size[1], 0,0, this.size[0], this.size[1]);
+		if(this.type === 'unit' && this.currentHealth > 0){
+			Context.fillStyle = '#3d1400';
+			Context.fillRect(this.size[0]/2 - 11, this.size[1] + 4, 22, 7);
+			Context.fillStyle = '#029400';
+			Context.fillRect(this.size[0]/2 - 10, this.size[1] + 5, (this.currentHealth/this.maxHealth) * 20, 5);
+			Context.fillStyle = '#940000';
+			Context.fillRect(this.size[0]/2 + 10, this.size[1] + 5, -(1 - (this.currentHealth/this.maxHealth)) * 20, 5);
+		}
+	};
+
 	this.drawWeapon = function(){
+		if(this.weapon[2]){
+			if(this.walkDir > 0){
+				wFrameMod = 0;
+			}else if(this.walkDir < 0){
+				wFrameMod = this.weapon[1][1] + 5;
+			}
+		}
 		Context.save();
-		Context.translate(this.size[0]/4, this.size[1]/2);
-		Context.rotate(this.weaponRot);
+		Context.translate(this.size[0]/2, this.size[1]/2);
 		Context.translate(this.weaponPos[0], this.weaponPos[1]);
-		Context.drawImage(imageRepo.imgs[2], this.weapon[0][0], this.weapon[0][1], this.weapon[1][0], this.weapon[1][1], -this.weapon[1][0], -this.weapon[1][1], this.weapon[1][0], this.weapon[1][1]);
+		Context.rotate(this.weaponRot);
+		Context.drawImage(imageRepo.imgs[2], this.weapon[0][0], this.weapon[0][1] + wFrameMod, this.weapon[1][0], this.weapon[1][1], 0, 0, this.weapon[1][0], this.weapon[1][1]);
 		Context.restore();
 	}
 

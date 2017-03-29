@@ -8,6 +8,7 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 		targetFound = false,
 		weapDir = [1, 1],
 		walkDir = aiParams[5],
+		defWalkDir = walkDir,
 		target = ['none'],
 		rndAng,
 		isWindingUp = true,
@@ -18,12 +19,19 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 		slope = (Math.random() * stepSize) * 2 - stepSize,
 		maxSteepness = 1,
 		maximumHeigth = Canvas.height*7/8,
-		moveX = 0;
+		moveX = 0,
+		prevWalkDir = walkDir;
 		rndHeigth = Math.random() * (maximumHeigth - game.renderBg.slopePath[posOnPath][1]) + game.renderBg.slopePath[posOnPath][1];
 		this.pos = [game.renderBg.slopePath[posOnPath][0], rndHeigth];
 		this.dead = false;
 		
-	this.animate = function(dt, speed, rot, weaponPos, inCombat, dmg){		
+		if(debugMode){
+			this.pos = mousePos;
+			truePosOnPath = this.pos[0];
+			posOnPath = Math.round(truePosOnPath);
+		}
+
+	this.animate = function(dt, speed, rot, weaponPos, inCombat, dmg, wDir){		
 		isFigthing = inCombat;
 		this.rot = rot;
 		this.weaponPos = weaponPos;
@@ -42,7 +50,9 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 
 			if(!targetFound){
 				
-				moveX = dt * speed * walkDir * ((Math.random() *  .5) + .5);
+				walkDir = defWalkDir;
+				
+				moveX = dt * speed * walkDir * ((Math.random() *  .5) + .5) * speedMult;
 				truePosOnPath += moveX;
 				posOnPath = Math.round(truePosOnPath);
 				this.pos[0] += moveX;
@@ -64,6 +74,8 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 				
 				if(posOnPath < 0){
 					posOnPath = 0;
+				}else if(posOnPath > game.renderBg.slopePath.length - 1){
+					posOnPath = game.renderBg.slopePath.length - 1;
 				}
 				
 				if(this.pos[1] < game.renderBg.slopePath[posOnPath][1]){
@@ -78,15 +90,23 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 				}
 
 			}else if(targetFound && target[0] != 'none' && typeof target[0] != 'undefined'){
-						
-				moveX = dt * speed * ((Math.random() *  .5) + .5);
+				
+				walkDir = wDir;
+				
+				moveX = dt * speed * ((Math.random() *  .5) + .5) * speedMult;
+				
+				if(this.pos[0] > target[0].currentPos[0]){
+					walkDir = -1;
+				}else if(this.pos[0] < target[0].currentPos[0]){
+					walkDir = 1;
+				}
 				
 				if(target[2] > prefDist){
 					if(this.pos[1] < game.renderBg.slopePath[posOnPath][1]){
 						truePosOnPath += walkDir * moveX;
 						posOnPath = Math.round(truePosOnPath);
 						this.pos[1] = game.renderBg.slopePath[posOnPath][1];
-						this.pos[1] += walkDir * moveX;
+						this.pos[0] += truePosOnPath;
 					}else{
 						this.pos[0] -= moveX * Math.cos(target[1]);		
 						this.pos[1] -= moveX * Math.sin(target[1]);	
@@ -96,10 +116,20 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 				}
 			}
 						
-			var rotResult = rotateWeapon(this.rot, aiParams[0], dt, rotDir, aiParams[2]);
-			var thrustResult = thrustWeapon(this.weaponPos, weapDir, aiParams[1], dt, aiParams[3]);
+			var rotResult = rotateWeapon(this.rot, aiParams[0], dt, rotDir, aiParams[2], walkDir);
+			var thrustResult = thrustWeapon(this.weaponPos, weapDir, aiParams[1], dt, aiParams[3], walkDir);
 		
-			this.rot = rotResult[0];
+			if(walkDir < prevWalkDir || walkDir > prevWalkDir){
+				if(walkDir > 0){
+					this.rot = aiParams[0][0];
+				}else if(walkDir < 0){
+					this.rot = Math.PI - PIby2 - aiParams[0][0];
+				}
+				while(this.rot < 0){this.rot+=PI2;};
+				while(this.rot > PI2){this.rot-=PI2;};
+			}else{
+				this.rot = rotResult[0];
+			}
 			rotDir = rotResult[1];
 			this.weaponPos = thrustResult[0];
 			weapDir = thrustResult[1];
@@ -111,7 +141,9 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 			rndAng = weapResult[3];
 		}
 		
-		return [this.pos, this.dead, this.rot, this.weaponPos, isFigthing];
+		prevWalkDir = walkDir;
+		
+		return [this.pos, this.dead, this.rot, this.weaponPos, isFigthing, walkDir];
 	};
 	
 	this.animateDeath = function(dt, pos, rot, alpha){
@@ -137,7 +169,7 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 				alpha = 0;
 				return [null, null, null, true];
 			}
-			pos[1] += dt * 70;
+			pos[1] += dt * 30;
 		}
 
 		return [pos, rot, alpha, false];
@@ -274,42 +306,60 @@ function findTarget(position, Friend){
 	return [target, targetAngle, distance];
 }
 
-function rotateWeapon(rot, minMaxRot, dt, rotDir, rotSpeed){
+function rotateWeapon(rot, minMaxRot, dt, rotDir, rotSpeed, walkDir){
 		
-	var rnd = Math.random();
-	
-	if(rot >= minMaxRot[0] && rot <= minMaxRot[1]){
+	var rnd = Math.random(),
+		minRot,
+		maxRot;
+		
+	if(walkDir > 0){
+		minRot = minMaxRot[0];
+		maxRot = minMaxRot[1];
+	}else if(walkDir < 0){
+		minRot = Math.PI - PIby2 - minMaxRot[1];
+		maxRot = Math.PI - PIby2 - minMaxRot[0];
+		while(minRot < 0){minRot+=PI2;};
+		while(minRot > PI2){minRot-=PI2;};
+		while(maxRot < 0){maxRot+=PI2;};
+		while(maxRot > PI2){maxRot-=PI2;};
+	}
+
+	if(rot >= minRot && rot <= maxRot){
 		rot += rotSpeed * dt * rnd * rotDir;
 	}else{
-		if(rot < minMaxRot[0]){
+		if(rot < minRot){
 			rot += rotSpeed * dt * rnd;
 			rotDir = 1;
-		}else if(rot > minMaxRot[1]){
+		}else if(rot > maxRot){
 			rot -= rotSpeed * dt * rnd;
 			rotDir = -1;
 		}
 	}
 
-	if(Math.random() * .75 >  Math.abs(minMaxRot[0])/Math.abs(rot) && rotDir > 0){
-		rotDir *= -1;
-	}else if(Math.random() * .75 > Math.abs(rot)/Math.abs(minMaxRot[1]) && rotDir < 0){
-		rotDir *= -1;
-	}
-	
 	return [rot, rotDir];
 }
 
-function thrustWeapon(weaponPos, weapDir, minMaxWep, dt, thrustSpeed){
+function thrustWeapon(weaponPos, weapDir, minMaxWep, dt, thrustSpeed, walkDir){
 	
-	var rnd = Math.random();
-	
-	if(weaponPos[0] > minMaxWep[0][0] && weaponPos[0] < minMaxWep[1][0]){
+	var rnd = Math.random(),
+		minWeap,
+		maxWeap;
+		
+	if(walkDir > 0){
+		minWeap = minMaxWep[0][0];
+		maxWeap = minMaxWep[1][0];
+	}else if(walkDir < 0){
+		minWeap = -minMaxWep[1][0];
+		maxWeap = -minMaxWep[0][0];
+	}
+		
+	if(weaponPos[0] > minWeap && weaponPos[0] < maxWeap){
 		weaponPos[0] += thrustSpeed * dt * rnd * weapDir[0];
 	}else{
-		if(weaponPos[0] < minMaxWep[0][0]){
+		if(weaponPos[0] < minWeap){
 			weaponPos[0] += thrustSpeed * dt * rnd;
 			weapDir[0] = 1;
-		}else if(weaponPos[0] > minMaxWep[1][0]){
+		}else if(weaponPos[0] > maxWeap){
 			weaponPos[0] -= thrustSpeed * dt * rnd;
 			weapDir[0] = -1;
 		}
@@ -327,24 +377,22 @@ function thrustWeapon(weaponPos, weapDir, minMaxWep, dt, thrustSpeed){
 		}
 	}
 	
-	if(Math.random() * dt * .5 > Math.abs(minMaxWep[0][0])/Math.abs(weaponPos[0]) && weapDir[0] > 0){
-		weapDir[0] *= -1;
-	}else if(Math.random() * dt * .5 > Math.abs(weaponPos[0])/Math.abs(minMaxWep[1][0]) && weapDir[0] < 0){
+	if(Math.random() * 2 * dt * fps < .25){
 		weapDir[0] *= -1;
 	}
-	if(Math.random() * dt * .5 > Math.abs(minMaxWep[0][1])/Math.abs(weaponPos[1]) && weapDir[1] > 0){
-		weapDir[1] *= -1;
-	}else if(Math.random() * dt * .5 > Math.abs(weaponPos[1])/Math.abs(minMaxWep[1][1]) && weapDir[1] < 0){
+	if(Math.random() * 2 * dt * fps < .25){
 		weapDir[1] *= -1;
 	}
-		
+	
 	return [weaponPos, weapDir];
 }
 
 function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindingUp, target, thisPos, rndAng, dmg){
 	
-	var maxWind = direction > 0 ? PIby3 : PIby9,
-		minWind = direction > 0 ? Math.PI: -PIby2;
+	var maxWind = direction > 0 ? Math.PI + PIby2: Math.PI,
+		minWind = direction > 0 ? PI2: PIby2,
+		maxPos = 8,
+		isWeapMax = [false, false];
 	
 	if(isWindingUp){
 		if(rot > maxWind){
@@ -352,26 +400,39 @@ function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWin
 		}else if(rot < maxWind + PIby10){
 			rot += rotSpeed/2 * dt * (Math.random() * .5 + .5);
 		}
-		if(weaponPos[0] > direction * -8){
-			weaponPos[0] -= direction * thrustSpeed * dt;
+		if(direction < 0){
+			if(weaponPos[0] > -maxPos){
+				weaponPos[0] -= dt * thrustSpeed;
+			}else{
+				isWeapMax[0] = true;
+			}
+		}else if(direction > 0){
+			if(weaponPos[0] < maxPos){
+				weaponPos[0] += dt * thrustSpeed;
+			}else{
+				isWeapMax[0] = true;
+			}
 		}
-		if(weaponPos[1] > -8){
-			weaponPos[1] -= thrustSpeed * dt;
+		
+		if(weaponPos[1] > -4){
+			weaponPos[1] -= dt * thrustSpeed;
+		}else{
+			isWeapMax[1] = true;
 		}
-		if(rot <= maxWind + PIby10 && rot >= maxWind && weaponPos[0] <= direction * -8 && weaponPos[1] <= direction * -8){
+		if(rot <= maxWind + PIby10 && rot >= maxWind && isWeapMax[0] && isWeapMax[1]){
 			isWindingUp = false;
 		}
 	}else{
 		if(direction > 0){
 			if(rot < minWind){
-				rot += 10 * dt * ((minWind + (PIby10 * direction)) - rot);
-				weaponPos[0] += 3 * dt;
-				weaponPos[1] += 3 * dt;
+				rot += 10 * dt * (minWind + PIby10 - rot);
+				weaponPos[0] -= 10 * dt;
+				weaponPos[1] += 20 * dt;
 			}else{
 				if(typeof target != 'undefined'){
 					let rndTing = Math.floor(Math.random() * 4) + 2;
 					for(var i = 0; i < rndTing; i++){
-						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]), target.currentPos[1] - (Math.random() * (target.size[1]/3) + target.size[1]/3)]);
+						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]/2), target.currentPos[1] - (Math.random() * (target.size[1]/3) + target.size[1]/3)]);
 					}
 					target.currentHealth -= dmg;
 				}
@@ -379,14 +440,14 @@ function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWin
 			}
 		}else if(direction < 0){
 			if(rot > minWind){
-				rot -= 10 * dt * (Math.abs(minWind + (PIby10 * direction)) - Math.abs(rot));
-				weaponPos[0] -= 3 * dt;
-				weaponPos[1] -= 3 * dt;
+				rot -= 10 * dt * (rot + PIby10 - minWind);
+				weaponPos[0] += 10 * dt;
+				weaponPos[1] += 20 * dt;
 			}else{
 				if(typeof target != 'undefined'){
 					let rndTing = Math.floor(Math.random() * 4) + 2;
 					for(var i = 0; i < rndTing; i++){
-						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]), target.currentPos[1] - (Math.random() * (target.size[1]/3)) + target.size[1]/3]);
+						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]/2), target.currentPos[1] - (Math.random() * (target.size[1]/3)) + target.size[1]/3]);
 					}
 					target.currentHealth -= dmg;
 				}
@@ -401,17 +462,18 @@ function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWin
 function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindingUp, target, thisPos, rndAng, dmg){
 	
 	var dx = (thisPos[0] - target.currentPos[0]),
-		dy = (thisPos[1] - target.currentPos[1]);
+		dy = (thisPos[1] - target.currentPos[1]),
+		inPos = [false, false];
 	
 	if(typeof rndAng != 'number'){
 		rndAng = Math.random() > .5 ? Math.random() * PIby12: -(Math.random() * PIby12); 
 	}
 	
-	var maxWind = thisPos[0] < target.currentPos[0] ? Math.atan2(dy, dx) - Math.PI/5 + rndAng : Math.atan2(dy, dx) - Math.PI/5 + rndAng - PI2;
+	var maxWind = thisPos[0] < target.currentPos[0] ? Math.atan2(dy, dx) - Math.PI/5 + rndAng + Math.PI: Math.atan2(dy, dx) - Math.PI/5 + rndAng - PI2 + Math.PI;
 	
 	if(maxWind < 0){
 		maxWind += PI2;
-	} 
+	}
 	
 	if(isWindingUp){
 		if(rot > maxWind){
@@ -419,24 +481,20 @@ function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWind
 		}else if(rot < maxWind - PIby10){
 			rot += rotSpeed * dt * (Math.random() * .5 + .5);
 		}
-		if(weaponPos[0] < 15){
-			weaponPos[0] += thrustSpeed * dt;
-		}
-		if(weaponPos[1] < 15){
-			weaponPos[1] += thrustSpeed * dt;
-		}
-		if(rot <= maxWind && rot >= maxWind - PIby10 && weaponPos[0] >= 15 && weaponPos[1] >= 15){
+
+		weaponPos[0] -= thrustSpeed * dt;
+		weaponPos[1] -= thrustSpeed * dt;
+		
+		if(rot <= maxWind && rot >= maxWind - PIby10 && inPos[0] && inPos[1]){
 			isWindingUp = false;
 		}
 	}else{
-		if(weaponPos[0] > -15){
-			weaponPos[0] -= 200 * dt;
-		}
-		if(weaponPos[1] > -15){
-			weaponPos[1] -= 200 * dt;
-		}
 		
-		if(weaponPos[0] <= -15 && weaponPos[1] <= -15){
+		weaponPos[0] -= 30 * dt * maxThrustX;
+	
+		weaponPos[1] -= 30 * dt * maxThrustY;
+		
+		if(false){
 			if(typeof target != 'undefined'){
 				let rndTing = Math.floor(Math.random() * 3) + 2;
 				for(var i = 0; i < rndTing; i++){
@@ -444,6 +502,8 @@ function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWind
 				}
 				target.currentHealth -= dmg;
 			}
+			inPos = [false, false];
+			rndAng = '';
 			isWindingUp = true;
 		}
 	}

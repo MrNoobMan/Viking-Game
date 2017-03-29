@@ -1,6 +1,7 @@
 function handleUI(){
 	
-	var defaultUnitBarPos = Canvas.height-50
+	var defaultUnitBarPos = Canvas.height-50,
+		debugTimer = 0;
 	
 	this.unitBarPos = defaultUnitBarPos;
 	
@@ -39,7 +40,8 @@ function handleUI(){
 	};
 	
 	this.updateUi = function(dt){
-		var Delta = dt;
+
+		debugTimer += dt;
 		
 		if(mousePos[1] >= this.unitBarPos && this.unitBarPos >= Canvas.height - 150){
 			this.unitBarPos -= 300 * dt;
@@ -53,6 +55,46 @@ function handleUI(){
 			}
 		}
 		
+		if(debugMode && debugTimer > .25){
+			if(KEY_STATUS.a){
+				game.allEntities.spawn('player', game.unitStats.axeViking);
+				debugTimer = 0;
+			}else if(KEY_STATUS.s){
+				game.allEntities.spawn('player', game.unitStats.bowViking);
+				debugTimer = 0;
+			}else if(KEY_STATUS.d){
+				game.allEntities.spawn('player', game.unitStats.spearViking);
+				debugTimer = 0;
+			}else if(KEY_STATUS.f){
+				game.allEntities.spawn('player', game.unitStats.bearserker);
+				debugTimer = 0;
+			}else if(KEY_STATUS.g){
+				game.allEntities.spawn('player', game.unitStats.swordViking);
+				debugTimer = 0;
+			}else if(KEY_STATUS.h){
+				game.allEntities.spawn('player', game.unitStats.valkyrie);
+				debugTimer = 0;
+			}else if(KEY_STATUS.z){
+				game.allEntities.spawn('monk', game.unitStats.monk);
+				debugTimer = 0;
+			}else if(KEY_STATUS.x){
+				game.allEntities.spawn('monk', game.unitStats.zealot);
+				debugTimer = 0;
+			}else if(KEY_STATUS.c){
+				game.allEntities.spawn('monk', game.unitStats.guardsMan);
+				debugTimer = 0;
+			}else if(KEY_STATUS.v){
+				game.allEntities.spawn('monk', game.unitStats.crusader);
+				debugTimer = 0;
+			}else if(KEY_STATUS.i){
+				if(speedMult === 1){
+					speedMult = 0;
+				}else{
+					speedMult = 1;
+				}
+				debugTimer = 0;
+			}
+		}
 	};
 	
 	this.draw = function(dt){
@@ -76,7 +118,7 @@ function handleUI(){
 			}
 		}
 	};
-	
+		
 };
 
 function uIBox(size, unitParams, pos, timer){

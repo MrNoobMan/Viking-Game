@@ -1,6 +1,8 @@
 var Canvas = document.getElementById('gameCanvas'),
 	Context = Canvas.getContext('2d'),
-	Wrapper = document.getElementById('wrapper');
+	Wrapper = document.getElementById('wrapper'),
+	debugMode = true,
+	speedMult = 1;
 
 const PI2 = Math.PI*2,
 	PIby12 = Math.PI/12,
@@ -24,7 +26,20 @@ KEY_CODES = {
   51: '3',
   52: '4',
   53: '5',
-  54: '6'
+  54: '6',
+  65: 'a',
+  83: 's',
+  68: 'd',
+  70: 'f',
+  71: 'g',
+  72: 'h',
+  90: 'z',
+  88: 'x',
+  67: 'c',
+  86: 'v',
+  66: 'b',
+  78: 'n',
+  73: 'i'
 };
 // Creates the array to hold the KEY_CODES and sets all their values
 // to false. Checking true/flase is the quickest way to check status

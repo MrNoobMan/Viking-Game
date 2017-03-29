@@ -23,12 +23,12 @@ function main(){
 		
 	fpsMeter(Delta);
 	
-	if(tImer > 1){
+	/*if(tImer > 1){
 		game.allEntities.spawn('monk', themMonks[Math.floor(Math.random() * themMonks.length)]);
 		game.allEntities.spawn('player', themVikings[Math.floor(Math.random() * themVikings.length)]);
 		tImer = 0;
 	}
-	tImer += Delta;
+	tImer += Delta;*/
 	
 	requestAnimationFrame(main);
 }
@@ -45,7 +45,7 @@ function updateAll(dt, entities){
 				if(entities[x][i].currentHealth <= 0 && !entities[x][i].dying && entities[x][i].alive){
 					entities[x][i].dying = true;
 				}else if(!entities[x][i].dying && entities[x][i].alive){
-					var updateStatus = entities[x][i].ai.animate(dt, entities[x][i].speed, entities[x][i].weaponRot, entities[x][i].weaponPos, entities[x][i].isFigthing, entities[x][i].dmg);
+					var updateStatus = entities[x][i].ai.animate(dt, entities[x][i].speed, entities[x][i].weaponRot, entities[x][i].weaponPos, entities[x][i].isFigthing, entities[x][i].dmg, entities[x][i].walkDir);
 					if(updateStatus[1]){
 						entities[x][i].alive = false;
 						entities[x].splice(i, 1);
@@ -56,6 +56,7 @@ function updateAll(dt, entities){
 						entities[x][i].weaponRot = updateStatus[2];
 						entities[x][i].weaponPos = updateStatus[3];
 						entities[x][i].isFigthing = updateStatus[4];
+						entities[x][i].walkDir = updateStatus[5];
 					}
 				}
 				if(entities[x][i].dying){

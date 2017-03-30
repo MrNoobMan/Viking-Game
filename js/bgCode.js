@@ -1,7 +1,7 @@
 var Canvas = document.getElementById('gameCanvas'),
 	Context = Canvas.getContext('2d'),
 	Wrapper = document.getElementById('wrapper'),
-	debugMode = true,
+	debugMode = false,
 	speedMult = 1;
 
 const PI2 = Math.PI*2,
@@ -17,9 +17,7 @@ const PI2 = Math.PI*2,
 	PI2by3 = Math.PI*2/3,
 	PI3by4 = Math.PI*3/4,
 	PI3by2 = Math.PI*3/2;
-	
-// The keycodes that will be mapped when a user presses a button.
-// Original code by Doug McInnes
+
 KEY_CODES = {
   49: '1',
   50: '2',
@@ -41,20 +39,12 @@ KEY_CODES = {
   78: 'n',
   73: 'i'
 };
-// Creates the array to hold the KEY_CODES and sets all their values
-// to false. Checking true/flase is the quickest way to check status
-// of a key press and which one was pressed when determining
-// when to move and which direction.
+
 KEY_STATUS = {};
 for (code in KEY_CODES) {
   KEY_STATUS[ KEY_CODES[ code ]] = false;
 };
-/**
- * Sets up the document to listen to onkeydown events (fired when
- * any key on the keyboard is pressed down). When a key is pressed,
- * it sets the appropriate direction to true to let us know which
- * key it was.
- */
+
 document.onkeydown = function(e) {
   // Firefox and opera use charCode instead of keyCode to
   // return which key was pressed.
@@ -64,12 +54,7 @@ document.onkeydown = function(e) {
     KEY_STATUS[KEY_CODES[keyCode]] = true;
   }
 };
-/**
- * Sets up the document to listen to ownkeyup events (fired when
- * any key on the keyboard is released). When a key is released,
- * it sets teh appropriate direction to false to let us know which
- * key it was.
- */
+
 document.onkeyup = function(e) {
   var keyCode = (e.keyCode) ? e.keyCode : e.charCode;
   if (KEY_CODES[keyCode]) {
@@ -148,7 +133,7 @@ function fpsMeter(dt){
 	if(last10.length >= 10){
 		for(var i = 0; i < last10.length; i++){
 			sumFps += last10[i];
-			avarageFps = Math.round(sumFps/last10.length);
+			avarageFps = (sumFps/last10.length).toFixed(1);
 		}
 		last10.splice(0, last10.length);
 		sumFps = 0;
@@ -156,8 +141,8 @@ function fpsMeter(dt){
 	
 	Context.strokeStyle = "#fff";
 	Context.font="bold 20.5px Arial Black, Gadget, sans-serif";
-	Context.strokeText( Math.round(avarageFps)+" fps", 5, 20);
-	Context.fillText( Math.round(avarageFps)+" fps", 5, 20);
+	Context.strokeText(avarageFps+" fps", 5, 20);
+	Context.fillText(avarageFps+" fps", 5, 20);
 };
 
 Canvas.onmousemove = function(e) {

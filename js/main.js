@@ -23,12 +23,12 @@ function main(){
 		
 	fpsMeter(Delta);
 	
-	/*if(tImer > 1){
+	if(tImer > 1){
 		game.allEntities.spawn('monk', themMonks[Math.floor(Math.random() * themMonks.length)]);
 		game.allEntities.spawn('player', themVikings[Math.floor(Math.random() * themVikings.length)]);
 		tImer = 0;
 	}
-	tImer += Delta;*/
+	tImer += Delta;
 	
 	requestAnimationFrame(main);
 }
@@ -127,6 +127,10 @@ function renderAll(dt, entities){
 			return 1;
 		}else if(b.type === 'projectile'){
 			return -1;
+		}else if(a.dying){
+			return -1;
+		}else if(b.dying){
+			return 1;
 		}else{
 			return a.currentPos[1] - b.currentPos[1];
 		}

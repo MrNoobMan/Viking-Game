@@ -96,7 +96,7 @@ function unitStats(){
 					[[310,0], [40,40], false],	//weapon - [framPos, size]
 					8,					//dmg
 					100],
-					[[0, PIby2], [[10, 10], [15, 15]], 4, 25, [450, 'shootBow'], 1, 0, true],
+					[[PIby8, PIby2-PIby8], [[-2, -20], [8, -15]], 4, 25, [450, 'shootBow'], 1, 0, true],
 					4,
 					1250
 	];
@@ -124,7 +124,7 @@ function unitStats(){
 					'unit',				//type
 					'player',			//allegiance
 					[[110,0], [50,50], false],	//weapon - [framPos, size]
-					10,					//dmg
+					5,					//dmg
 					200], 				//worth
 					[[PI2-PIby3, PI2-PIby8], [[-5, -5], [10, 10]], 6, 30, [50, 'slashWeapon'], 1, 0, true],
 					2,
@@ -164,7 +164,7 @@ function unitStats(){
 	this.monk = [[imageRepo.imgs[3],
 				[22, 56],
 				[0, 0],
-				65,
+				70,
 				40,	
 				'unit',
 				'enemy',
@@ -177,7 +177,7 @@ function unitStats(){
 	this.guardsMan = [[imageRepo.imgs[3],
 				[26, 58],
 				[57, 0],
-				75,
+				80,
 				35,
 				'unit',
 				'enemy',
@@ -190,7 +190,7 @@ function unitStats(){
 	this.zealot = [[imageRepo.imgs[3],
 				[22, 56],
 				[91, 0],
-				70,
+				75,
 				40,
 				'unit',
 				'enemy',
@@ -203,12 +203,12 @@ function unitStats(){
 	this.crusader = [[imageRepo.imgs[3],
 				[26, 60],
 				[27, 0],
-				85,
+				90,
 				35,	
 				'unit',
 				'enemy',
 				[[60, 88], [46,46]],
-				7,
+				10,
 				50],
 				[[Math.PI+PIby8, PI2-PIby2], [[10, -10],[15, -5]], 3, 25, [50, 'slashWeapon'], -1, game.renderBg.slopePath.length-1, false] 
 	];

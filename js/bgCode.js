@@ -91,6 +91,13 @@ document.onkeyup = function(e) {
         window.cancelAnimationFrame = function(id) {
             clearTimeout(id);
         };
+	
+	//Removing the AA of the canvas
+	for(var i = 0; i < vendors.length; i++){
+		window['Context'][vendors[i]+'imageSmoothingEnabled '] = false;
+	}
+	Context.imageSmoothingEnabled  = false;
+
 }());
 
 Math.hypot = Math.hypot || function() {
@@ -138,7 +145,7 @@ function fpsMeter(dt){
 		last10.splice(0, last10.length);
 		sumFps = 0;
 	}
-	
+
 	Context.strokeStyle = "#fff";
 	Context.font="bold 20.5px Arial Black, Gadget, sans-serif";
 	Context.strokeText(avarageFps+" fps", 5, 20);

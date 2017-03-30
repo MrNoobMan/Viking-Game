@@ -9,6 +9,7 @@ canvas{
     margin-left: auto;
     margin-right: auto;
 	cursor: url(pics/cursor.png), auto;
+	image-rendering: pixelated;
 }
 
 #wrapper{

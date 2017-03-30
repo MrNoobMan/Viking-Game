@@ -25,12 +25,12 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 		this.pos = [game.renderBg.slopePath[posOnPath][0], rndHeigth];
 		this.dead = false;
 		
-		if(debugMode){
-			this.pos = mousePos;
+		/*if(debugMode){
+			/*this.pos = mousePos;
 			truePosOnPath = this.pos[0] - 30;
 			posOnPath = Math.round(truePosOnPath);
 			speedMult = 0;
-		}
+		}*/
 
 	this.animate = function(dt, speed, rot, weaponPos, inCombat, dmg, wDir){		
 		isFigthing = inCombat;
@@ -136,7 +136,7 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 			this.weaponPos = thrustResult[0];
 			weapDir = thrustResult[1];
 		}else if(isFigthing){
-			var weapResult = window[aiParams[4][1]](this.weaponPos, this.rot, walkDir, dt, aiParams[3], aiParams[2], isWindingUp, target[0], this.pos, rndAng, dmg);
+			var weapResult = window[aiParams[4][1]](this.weaponPos, this.rot, walkDir, dt, aiParams[3], aiParams[2], isWindingUp, target[0], this.pos, rndAng, dmg, allegiance);
 			this.rot = weapResult[1];
 			this.weaponPos = weapResult[0];
 			isWindingUp = weapResult[2];
@@ -217,7 +217,7 @@ function arrowAi(originPos, targetPos, thisSize){
 		
 			currentPos = [x, y];
 
-			if((x < p_2[0] && y > p_0[1]) || (x >= p_2[0] && y > p_1[1])){
+			if((x < p_2[0] && y > (p_1[0] < p_0[0] ? p_1[1]: p_0[1])) || (x >= p_2[0] && y > (p_1[0] > p_0[0] ? p_1[1]: p_0[1]))){
 				return [currentPos, true];
 			}
 			
@@ -389,7 +389,7 @@ function thrustWeapon(weaponPos, weapDir, minMaxWep, dt, thrustSpeed, walkDir){
 	return [weaponPos, weapDir];
 }
 
-function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindingUp, target, thisPos, rndAng, dmg){
+function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindingUp, target, thisPos, rndAng, dmg, allegiance){
 	
 	var maxWind = direction > 0 ? Math.PI + PIby2: Math.PI,
 		minWind = direction > 0 ? PI2: PIby2,
@@ -461,7 +461,7 @@ function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWin
 	return [weaponPos, rot, isWindingUp];
 }
 
-function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindingUp, target, thisPos, rndAng, dmg){
+function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindingUp, target, thisPos, rndAng, dmg, allegiance){
 	
 	var dx = (thisPos[0] - target.currentPos[0]),
 		dy = (thisPos[1] - target.currentPos[1]),
@@ -533,7 +533,7 @@ function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWind
 	return [weaponPos, rot, isWindingUp, rndAng];
 }
 
-function shootBow(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindingUp, target, thisPos, rndAng, dmg){
+function shootBow(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindingUp, target, thisPos, rndAng, dmg, friend){
 	
 	var maxWind = direction > 0 ? -PIby2: Math.PI;
 
@@ -563,7 +563,11 @@ function shootBow(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWindin
 			}
 		}
 	}else{
-		game.allEntities.fire('playerArrow', game.unitStats.friendlyArrow, dmg, [[thisPos[0]-10, thisPos[1]-20], target.currentPos]);
+		if(friend){
+			game.allEntities.fire('playerArrow', game.unitStats.friendlyArrow, dmg, [[thisPos[0]-10, thisPos[1]-20], target.currentPos]);
+		}else if(!friend){
+			game.allEntities.fire('enemyArrow', game.unitStats.enemyArrow, dmg, [[thisPos[0]-10, thisPos[1]-20], target.currentPos]);
+		}
 		if(direction > 0){
 			weaponPos = [-20, 20];
 		}else{

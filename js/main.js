@@ -81,16 +81,16 @@ function updateAll(dt, entities){
 						entities[x][i].currentPos = updateStatus[0];
 						entities[x][i].rot = updateStatus[2];
 						entities[x][i].point = updateStatus[3];
-						if(entities[x][i].unUsed && entities[x][i].allegiance === 'player'){
-							for(var y = 0; y < entities[1].length; y++){
-								if(!entities[1][y].dying){
-									if(entities[x][i].ai.checkCollision(entities[1][y])){
-										entities[1][y].currentHealth -= entities[x][i].dmg;
-										entities[x][i].dmg = 0;
-										entities[x][i].unUsed = false;
-										entities[x][i].dying = true;
-										break;
-									}
+						var P = entities[x][i].allegiance === 'player' ? 1 : 0;
+						for(var y = 0; y < entities[P].length; y++){
+							if(!entities[P][y].dying){
+								if(entities[x][i].ai.checkCollision(entities[P][y])){
+									entities[P][y].currentHealth -= entities[x][i].dmg;
+									console.log(entities[x][i].dmg);
+									entities[x][i].dmg = 0;
+									entities[x][i].unUsed = false;
+									entities[x][i].dying = true;
+									break;
 								}
 							}
 						}
@@ -344,7 +344,7 @@ function Game(){
 		
 		this.handleUI.init();
 	
-		themMonks = [this.unitStats.monk, this.unitStats.guardsMan, this.unitStats.crusader, this.unitStats.zealot];
+		themMonks = [this.unitStats.monk, this.unitStats.bowMan, this.unitStats.guardsMan, this.unitStats.crusader, this.unitStats.zealot];
 		themVikings = [this.unitStats.axeViking, this.unitStats.spearViking, this.unitStats.bowViking, this.unitStats.bearserker, this.unitStats.swordViking, this.unitStats.valkyrie];
 		
 		main();

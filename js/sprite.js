@@ -30,7 +30,8 @@ function imageLoaded(){
 function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, allegiance, weapon, dmg, worth
 	
 	this.img = unitParams[0];
-	this.size = unitParams[1];
+	this.frameSize = unitParams[1];
+	this.size = [this.frameSize[0]*2, this.frameSize[1]*2];
 	this.framePos = unitParams[2];
 	this.maxHealth = unitParams[3];
 	this.speed = unitParams[4];
@@ -69,9 +70,9 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 		if(this.walkDir > 0){
 			frameMod = 0;
 		}else if(this.walkDir < 0){
-			frameMod = 70;
+			frameMod = 35;
 		}
-		Context.drawImage(this.img, this.framePos[0], this.framePos[1] + frameMod, this.size[0], this.size[1], 0,0, this.size[0], this.size[1]);
+		Context.drawImage(this.img, this.framePos[0], this.framePos[1] + frameMod, this.frameSize[0], this.frameSize[1], 0,0, this.size[0], this.size[1]);
 		if(this.type === 'unit' && this.currentHealth > 0){
 			Context.fillStyle = '#3d1400';
 			Context.fillRect(this.size[0]/2 - 11, this.size[1] + 4, 22, 7);
@@ -80,6 +81,10 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 			Context.fillStyle = '#940000';
 			Context.fillRect(this.size[0]/2 + 10, this.size[1] + 5, -(1 - (this.currentHealth/this.maxHealth)) * 20, 5);
 		}
+		if(debugMode){
+			Context.font = '10px Arial Black';
+			Context.fillText(this.id, 0, -5);
+		};
 	};
 
 	this.drawWeapon = function(){
@@ -87,14 +92,14 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 			if(this.walkDir > 0){
 				wFrameMod = 0;
 			}else if(this.walkDir < 0){
-				wFrameMod = this.weapon[1][1] + 5;
+				wFrameMod = this.weapon[1][1] + 2;
 			}
 		}
 		Context.save();
-		Context.translate(this.size[0]/2, this.size[1]/2);
+		Context.translate(this.frameSize[0], this.frameSize[1]);
 		Context.translate(this.weaponPos[0], this.weaponPos[1]);
 		Context.rotate(this.weaponRot);
-		Context.drawImage(imageRepo.imgs[2], this.weapon[0][0], this.weapon[0][1] + wFrameMod, this.weapon[1][0], this.weapon[1][1], 0, 0, this.weapon[1][0], this.weapon[1][1]);
+		Context.drawImage(imageRepo.imgs[2], this.weapon[0][0], this.weapon[0][1] + wFrameMod, this.weapon[1][0], this.weapon[1][1], 0, 0, this.weapon[1][0]*2, this.weapon[1][1]*2);
 		Context.restore();
 	}
 

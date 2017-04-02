@@ -25,12 +25,11 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 		this.pos = [game.renderBg.slopePath[posOnPath][0], rndHeigth];
 		this.dead = false;
 		
-		/*if(debugMode){
-			/*this.pos = mousePos;
+		if(debugMode){
+			this.pos = mousePos;
 			truePosOnPath = this.pos[0] - 30;
 			posOnPath = Math.round(truePosOnPath);
-			speedMult = 0;
-		}*/
+		}
 
 	this.animate = function(dt, speed, rot, weaponPos, inCombat, dmg, wDir){		
 		isFigthing = inCombat;
@@ -85,11 +84,11 @@ function basicAi(aiParams){ //minMaxRot, minMaxWep, rotSpeed, thrustSpeed, comba
 					this.pos[1] = maximumHeigth;
 					stepSize *= -1;
 				}
-				if(target[0] != 'none' && typeof target[0] != 'undefined' && target[0].currentHealth > 0){
+				if(target[0] !== 'none' && typeof target[0] !== 'undefined' && target[0].currentHealth > 0){
 					targetFound = true;
 				}
 
-			}else if(targetFound && target[0] != 'none' && typeof target[0] != 'undefined' && target[0].currentHealth > 0){
+			}else if(targetFound && target[0] !== 'none' && typeof target[0] !== 'undefined' && target[0].currentHealth > 0){
 				
 				walkDir = wDir;
 				
@@ -245,7 +244,7 @@ function arrowAi(originPos, targetPos, thisSize){
 			return [null, null, null, true];
 		}
 		if(this.stuck){
-			if(typeof attatchedTarget.currentPos != 'undefined' && attatchedTarget.currentHealth > 0){
+			if(typeof attatchedTarget.currentPos !== 'undefined' && attatchedTarget.currentHealth > 0){
 				currentPos[0] = attatchedTarget.currentPos[0] + xDiff;
 				currentPos[1] = attatchedTarget.currentPos[1] - yDiff;
 			}else{
@@ -301,7 +300,7 @@ function findTarget(position, Friend, prefDist){
 		}
 	}
 
-	if(target != 'none'){
+	if(target !== 'none'){
 		targetAngle = Math.atan2(position[1] - target.currentPos[1], position[0] - target.currentPos[0]);
 	}
 
@@ -431,7 +430,7 @@ function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWin
 				weaponPos[0] -= 10 * dt;
 				weaponPos[1] += 20 * dt;
 			}else{
-				if(typeof target != 'undefined'){
+				if(typeof target !== 'undefined'){
 					let rndTing = Math.floor(Math.random() * 4) + 2;
 					for(var i = 0; i < rndTing; i++){
 						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]/2), target.currentPos[1] - (Math.random() * (target.size[1]/3) + target.size[1]/3)]);
@@ -446,7 +445,7 @@ function slashWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWin
 				weaponPos[0] += 10 * dt;
 				weaponPos[1] += 20 * dt;
 			}else{
-				if(typeof target != 'undefined'){
+				if(typeof target !== 'undefined'){
 					let rndTing = Math.floor(Math.random() * 4) + 2;
 					for(var i = 0; i < rndTing; i++){
 						game.allEntities.spillBlood([target.currentPos[0] + (Math.random() * target.size[0]/2), target.currentPos[1] - (Math.random() * (target.size[1]/3)) + target.size[1]/3]);
@@ -467,7 +466,7 @@ function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWind
 		dy = (thisPos[1] - target.currentPos[1]),
 		inPos = [false, false, false];
 	
-	if(typeof rndAng != 'number'){
+	if(typeof rndAng !== 'number'){
 		rndAng = Math.random() > .5 ? Math.random() * PIby12: -(Math.random() * PIby12); 
 	}
 	
@@ -518,7 +517,7 @@ function stabWeapon(weaponPos, rot, direction, dt, thrustSpeed, rotSpeed, isWind
 		weaponPos[1] -= 200 * dt * maxThrustY;
 		
 		if(inPos[2]){
-			if(typeof target != 'undefined'){
+			if(typeof target !== 'undefined'){
 				let rndTing = Math.floor(Math.random() * 3) + 2;
 				for(var i = 0; i < rndTing; i++){
 					game.allEntities.spillBlood([target.currentPos[0], target.currentPos[1] - (Math.random() * (target.size[1]/3) + target.size[1]/3)]);

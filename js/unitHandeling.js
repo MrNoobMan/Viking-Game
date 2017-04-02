@@ -79,13 +79,13 @@ function allEntities(){
 function unitStats(){
 	
 	this.axeViking = [[imageRepo.imgs[1],	//img
-					[15,30],			//size
+					[11,30],			//size
 					[0,0],				//framPos
 					100,				//maxHp
 					35,					//px/sec
 					'unit',				//type
 					'player',			//allegiance
-					[[0,0], [20,20], true],	//weapon - [framPos, size, asym]
+					[[[0,0], [20,20], true], [[0,0],[13, 13], [[3, -6], 19.5], false]],	//weapon - [framPos, size, asym], [accessoryy];
 					5,					//dmg
 					100],				//worth
 					[[Math.PI-PIby8, Math.PI+PIby8], [[-15, -5],[-10, 1]], 5, 25, [50, 'slashWeapon'], 1, 0, true],	//[minMaxRot, minMaxWeap, rotSpeed, thrustSpeed, [preferedDist, cmbtStyle], dir, start]
@@ -94,14 +94,14 @@ function unitStats(){
 	];
 
 	this.bowViking = [[imageRepo.imgs[1],	//img
-					[15,29],			//size
-					[33,0],				//framPos
+					[10,29],			//size
+					[36,0],				//framPos
 					70,					//maxHp
 					30,					//px/sec
 					'unit',				//type
 					'player',			//allegiance
-					[[155,0], [20,20], false],	//weapon - [framPos, size]
-					8,					//dmg
+					[[[155,0], [20,20], false], [[23,17],[7, 12], [[-7, 12], 10.5], true]],	//weapon - [framPos, size]
+					6,					//dmg
 					100],
 					[[PIby8, PIby2-PIby8], [[-2, -20], [8, -15]], 4, 25, [450, 'shootBow'], 1, 0, true],
 					4,
@@ -110,12 +110,12 @@ function unitStats(){
 	
 	this.spearViking = [[imageRepo.imgs[1],	//img
 						[11,30],			//size
-						[20,0],				//framPos
+						[18,0],				//framPos
 						85,					//maxHp
 						30,					//px/sec
 						'unit',				//type
 						'player',			//allegiance
-						[[22,0], [30,30], false],	//weapon - [framPos, size]
+						[[[22,0], [30,30], false]],	//weapon - [framPos, size]
 						6,					//dmg
 						150], 				//worth
 						[[Math.PI+PIby4-PIby10, Math.PI+PIby4+PIby12], [[-5, 2], [5, 17]], 1, 25, [70, 'stabWeapon'], 1, 0, true],
@@ -130,7 +130,7 @@ function unitStats(){
 					50,					//px/sec
 					'unit',				//type
 					'player',			//allegiance
-					[[55,0], [25,25], false],	//weapon - [framPos, size]
+					[[[55,0], [25,25], false]],	//weapon - [framPos, size]
 					5,					//dmg
 					200], 				//worth
 					[[PI2-PIby3, PI2-PIby8], [[-5, -5], [10, 10]], 6, 30, [50, 'slashWeapon'], 1, 0, true],
@@ -145,7 +145,7 @@ function unitStats(){
 						20,					//px/sec
 						'unit',				//type
 						'player',			//allegiance
-						[[85,0], [30,30], false],	//weapon - [framPos, size]
+						[[[85,0], [30,30], false]],	//weapon - [framPos, size]
 						10,					//dmg
 						250], 				//worth
 						[[PI2-PIby4, PI2-PIby8], [[5, 5], [10, 10]], 3, 40, [65, 'slashWeapon'], 1, 0, true],
@@ -154,13 +154,13 @@ function unitStats(){
 	];
 	
 	this.valkyrie = [[imageRepo.imgs[1],	//img
-					[17,30],			//size
+					[13,30],			//size
 					[82,0],				//framPos
 					120,				//maxHp
 					35,					//px/sec
 					'unit',				//type
 					'player',			//allegiance
-					[[120,0], [30,30], false],	//weapon - [framPos, size]
+					[[[120,0], [30,30], false], [[15,0],[15, 15], [[4.5, -7.5], 18], false]],	//weapon - [framPos, size]
 					15,					//dmg
 					300], 				//worth
 					[[Math.PI+PIby4-PIby10, Math.PI+PIby4+PIby12], [[-15, -5], [-10, 10]], 2, 30, [70, 'stabWeapon'], 1, 0, true],
@@ -175,7 +175,7 @@ function unitStats(){
 				40,	
 				'unit',
 				'enemy',
-				[[0, 44], [25,25], false],
+				[[[0, 44], [25,25], false]],
 				8,
 				50],
 				[[Math.PI+PIby4, Math.PI+PIby4+PIby8], [[10, 5], [15, 20]], 3, 25, [55, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false] 
@@ -188,7 +188,7 @@ function unitStats(){
 				35,
 				'unit',
 				'enemy',
-				[[22,0], [30,30], false],
+				[[[22,0], [30,30], false], [[12,17],[8, 8], [[13.5, -1.5], 19.5], false]],
 				10,
 				50],
 				[[Math.PI+PIby4-PIby10, Math.PI+PIby4+PIby12], [[-20, 5], [-5, 15]], 2, 25, [65, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false] 
@@ -201,34 +201,34 @@ function unitStats(){
 				40,
 				'unit',
 				'enemy',
-				[[59, 44], [30,30], false],
+				[[[59, 44], [30,30], false]],
 				12,
 				65],
 				[[PI2-PI3by4, PI2-PIby2], [[1, 1], [5, 15]], 2.5, 30, [60, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false]
 	];
 
 	this.crusader = [[imageRepo.imgs[3],
-				[13, 30],
-				[27, 0],
+				[11, 30],
+				[15, 0],
 				90,
 				35,	
 				'unit',
 				'enemy',
-				[[30, 44], [23,23]],
+				[[[30, 44], [23,23], false], [[0,16],[9, 14], [[7, -5], 18], false]],
 				10,
 				50],
 				[[Math.PI+PIby8, PI2-PIby2], [[10, -10],[15, -5]], 3, 25, [50, 'slashWeapon'], -1, game.renderBg.slopePath.length-1, false] 
 	];
 	
 	this.bowMan = [[imageRepo.imgs[3],	//img
-					[16,29],			//size
-					[59,0],				//framPos
+					[12,29],			//size
+					[60,0],				//framPos
 					70,					//maxHp
 					30,					//px/sec
 					'unit',				//type
 					'enemy',			//allegiance
-					[[155,0], [20,20], false],	//weapon - [framPos, size]
-					8,					//dmg
+					[[[155,0], [20,20], false], [[23,17],[7, 12], [[-6.3, 13.5], 13.5], true]],	//weapon - [framPos, size]
+					6,					//dmg
 					50],
 					[[PIby8, PIby2-PIby8], [[-2, -20], [8, -15]], 4, 25, [450, 'shootBow'], -1, game.renderBg.slopePath.length-1, false]
 	];
@@ -240,7 +240,7 @@ function unitStats(){
 				60,
 				'projectile',
 				'player',
-				[[],[]],
+				[[]],
 				1,
 				1];
 
@@ -251,7 +251,7 @@ function unitStats(){
 				60,
 				'projectile',
 				'enemy',
-				[[],[]],
+				[[]],
 				1,
 				1];
 };

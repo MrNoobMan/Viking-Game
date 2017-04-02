@@ -54,7 +54,7 @@ function handleUI(){
 				this.buttons[i].spawnUnit();
 			}
 		}
-		
+
 		if(debugMode && debugTimer > .25){
 			if(KEY_STATUS.a){
 				game.allEntities.spawn('player', game.unitStats.axeViking);
@@ -85,7 +85,10 @@ function handleUI(){
 				debugTimer = 0;
 			}else if(KEY_STATUS.v){
 				game.allEntities.spawn('monk', game.unitStats.crusader);
-				debugTimer = 0;
+				debugTimer = 0; 
+			}else if(KEY_STATUS.b){
+				game.allEntities.spawn('monk', game.unitStats.bowMan);
+				debugTimer = 0; 
 			}else if(KEY_STATUS.i){
 				if(speedMult === 1){
 					speedMult = 0;
@@ -93,7 +96,7 @@ function handleUI(){
 					speedMult = 1;
 				}
 				debugTimer = 0;
-			}
+			}		
 		}
 	};
 	
@@ -179,7 +182,7 @@ function uIBox(size, unitParams, pos, timer){
 			}, unitParams[3]);
 			
 			for(var i = 0; i < game.handleUI.buttons.length; i++){
-				if(i != game.handleUI.buttons.indexOf(this)){
+				if(i !== game.handleUI.buttons.indexOf(this)){
 					game.handleUI.buttons[i].onCD = true;
 				}
 			}

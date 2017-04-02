@@ -83,12 +83,9 @@ function updateAll(dt, entities){
 						entities[x][i].point = updateStatus[3];
 						var P = entities[x][i].allegiance === 'player' ? 1 : 0;
 						for(var y = 0; y < entities[P].length; y++){
-							if(!entities[P][y].dying){
+							if(!entities[P][y].dying && entities[P][y].currentPos[0] > entities[x][i].currentPos[0]-80 && entities[P][y].currentPos[0] < entities[x][i].currentPos[0]+80){
 								if(entities[x][i].ai.checkCollision(entities[P][y])){
 									entities[P][y].currentHealth -= entities[x][i].dmg;
-									console.log(entities[x][i].dmg);
-									entities[x][i].dmg = 0;
-									entities[x][i].unUsed = false;
 									entities[x][i].dying = true;
 									break;
 								}

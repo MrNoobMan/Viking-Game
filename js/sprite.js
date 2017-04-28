@@ -18,7 +18,7 @@ var imageRepo = new function(){
 		}
 		this.imgs[i].crossOrigin = "Anonymous";
 	};
-			
+
 };
 
 function imageLoaded(){
@@ -49,19 +49,19 @@ function Sprite(unitParams){	//img, size, framePos, maxHealth, speed, type, alle
 	this.rot = 0;
 	this.alpha = 1;
 	this.walkDir = 1;
-	
+
 	var frameMod = 0,
 		wFrameMod = 0,
 		weapSize = this.type == 'unit' ? [this.weapon[1][0]*1.5, this.weapon[1][1]*1.5]: null,
 		accX = 0,
 		accY = 0,
 		accSize = typeof this.accessory !== 'undefined' ? [this.accessory[1][0]*1.5, this.accessory[1][1]*1.5]: null;
-	
+
 	this.weaponRot = 0;
 	this.weaponPos = [0,0];
-	
+
 	this.point = [0,0];
-	
+
 	this.currentPos = [0,0];
 	
 	this.spawn = function(position){
@@ -150,4 +150,34 @@ function bloodSpill(origin){
 		size -= dt;
 	}
 	
-};
+}
+
+function Structure(strucParams){
+	
+	this.img = strucParams[0];
+	this.framePos = strucParams[1];
+	this.frameSize = strucParams[2];
+	this.size = [this.frameSize[0]*1.5, this.frameSize[1]*1.5];
+	this.maxHealth = strucParams[3];
+	this.loot = strucParams[4];
+	
+	this.spawnPos = [20, 10];
+	this.type = 'structure';
+	
+	this.alive = false;
+	this.dying = false
+	this.currentHealth = 0;
+	this.currentPos = [0,0];
+	
+	this.spawn = function(pos){
+		this.currentPos = pos;
+		this.currentHealth = this.maxHealth;
+		this.spawnPos = [this.spawnPos[0] + pos[0], this.spawnPos[1] +  pos[1]];
+		this.alive = true;
+	}
+	
+	this.draw = function(Context){
+		Context.drawImage(this.img, this.framePos[0], this.framePos[1], this.frameSize[0], this.frameSize[1], 0,0, this.size[0], this.size[1]);
+	}
+	
+}

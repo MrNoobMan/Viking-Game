@@ -94,7 +94,7 @@ document.onkeyup = function(e) {
 	
 	//Removing the AA of the canvas
 	for(var i = 0; i < vendors.length; i++){
-		window['Context'][vendors[i]+'imageSmoothingEnabled '] = false;
+		window['Context'][vendors[i]+'imageSmoothingEnabled'] = false;
 	}
 	Context.imageSmoothingEnabled  = false;
 
@@ -152,7 +152,40 @@ function fpsMeter(dt){
 	Context.fillText(avarageFps+" fps", 5, 20);
 };
 
-Canvas.onmousemove = function(e) {
+Canvas.onmousemove = (e) => {
     mousePos = [e.clientX - Canvas.offsetLeft, e.clientY - Canvas.offsetTop];
 	//console.log(mousePos);
+}
+
+Canvas.onmousedown = (e) => {
+	
+	if(!this.makeSelection){
+		if(!this.isDrag){
+			this.startSelect[0] = mousePos[0];
+			this.startSelect[1] = mousePos[1];
+		}
+		this.isDrag = true;
+	}else if(this.makeSelection){
+		this.selectionPos = [mousePos[0], mousePos[1]];
+		
+		this.makeSelection = false;
+	}
+	game.handleUI.checkBox();
+}
+
+Canvas.onmouseup = (e) => {
+	this.isDrag = false;
+	if(game.handleUI.selectionRect[2] > 10 && game.handleUI.selectionRect[3] > 10){
+		this.makeSelection = true;
+		game.handleUI.selectionRect = [0,0,0,0];
+	}
+}
+
+Canvas.onmouseout = (e) => {
+	this.isDrag = false;
+	if(game.handleUI.selectionRect[2] > 10 && game.handleUI.selectionRect[3] > 10){
+		game.handleUI.selectionRect = [0,0,0,0];
+		this.makeSelection = true;
+	}
+	mousePos = [0,0];
 }

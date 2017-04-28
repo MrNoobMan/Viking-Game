@@ -3,8 +3,10 @@ var lastTimeCalled = Date.now(),
 	numLoaded = 0,
 	themMonks = [],
 	themVikings = [];
-	
-var tImer = 0;
+
+var tImer = 0,
+	vkTimer = 0,
+	money = 20000;
 	
 const numImages = imageRepo.imgSources.length;
 	
@@ -20,16 +22,23 @@ function main(){
 	Entities = updateAll(Delta, Entities);
 	
 	renderAll(Delta, Entities);
-		
+	
+	Context.fillStyle = 'black';
+	Context.fillText(money+' gold', 10, 40);
+	
 	fpsMeter(Delta);
 	
-	if(tImer > 1){
+	if(tImer > 3){
 		game.allEntities.spawn('monk', themMonks[Math.floor(Math.random() * themMonks.length)]);
-		game.allEntities.spawn('player', themVikings[Math.floor(Math.random() * themVikings.length)]);
+		/*if(vkTimer > 1.25){
+			game.allEntities.spawn('player', themVikings[Math.floor(Math.random() * themVikings.length)]);
+			vkTimer = 0;
+		}*/
 		tImer = 0;
 	}
 	tImer += Delta;
-	
+	//vkTimer += Delta;
+		
 	requestAnimationFrame(main);
 }
 
@@ -40,10 +49,13 @@ function updateAll(dt, entities){
 		
 		while(i > -1){
 			
-			if(entities[x][i].type === 'unit'){
+			if(entities[x][i].type == 'unit'){
 
 				if(entities[x][i].currentHealth <= 0 && !entities[x][i].dying && entities[x][i].alive){
 					entities[x][i].dying = true;
+					if(entities[x][i].allegiance == 'enemy'){
+						money += entities[x][i].worth;
+					}
 				}else if(!entities[x][i].dying && entities[x][i].alive){
 					var updateStatus = entities[x][i].ai.animate(dt, entities[x][i].speed, entities[x][i].weaponRot, entities[x][i].weaponPos, entities[x][i].isFigthing, entities[x][i].dmg, entities[x][i].walkDir);
 					if(updateStatus[1]){
@@ -72,7 +84,7 @@ function updateAll(dt, entities){
 						entities[x][i].alpha = updateStatus[2];
 					}
 				}
-			}else if(entities[x][i].type === 'projectile'){
+			}else if(entities[x][i].type == 'projectile'){
 				if(!entities[x][i].dying){
 					var updateStatus = entities[x][i].ai.animate(dt);
 					if(updateStatus[1]){
@@ -81,9 +93,9 @@ function updateAll(dt, entities){
 						entities[x][i].currentPos = updateStatus[0];
 						entities[x][i].rot = updateStatus[2];
 						entities[x][i].point = updateStatus[3];
-						var P = entities[x][i].allegiance === 'player' ? 1 : 0;
+						var P = entities[x][i].allegiance == 'player' ? 1 : 0;
 						for(var y = 0; y < entities[P].length; y++){
-							if(!entities[P][y].dying && entities[P][y].currentPos[0] > entities[x][i].currentPos[0]-80 && entities[P][y].currentPos[0] < entities[x][i].currentPos[0]+80){
+							if(!entities[P][y].dying && entities[P][y].currentPos[0] > entities[x][i].currentPos[0]-60 && entities[P][y].currentPos[0] < entities[x][i].currentPos[0]+60){
 								if(entities[x][i].ai.checkCollision(entities[P][y])){
 									entities[P][y].currentHealth -= entities[x][i].dmg;
 									entities[x][i].dying = true;
@@ -111,7 +123,7 @@ function updateAll(dt, entities){
 	}
 	
 	game.handleUI.updateUi(dt);
-
+	
 	return game.allEntities.aliveUnits.filter(removeDead);
 }
 
@@ -132,12 +144,10 @@ function renderAll(dt, entities){
 			return a.currentPos[1] - b.currentPos[1];
 		}
 	});
-	
+
 	for(var i = 0; i < entities.length; i++){
 		if(entities[i].alive){
-			if(entities[i].type === 'unit'){
-				Context.save();
-				//makeCross(entities[i].currentPos[0], entities[i].currentPos[1]);
+			if(entities[i].type == 'unit'){
 				Context.translate(entities[i].currentPos[0], entities[i].currentPos[1]);
 				if(entities[i].dying){
 					Context.globalAlpha = entities[i].alpha;
@@ -146,21 +156,21 @@ function renderAll(dt, entities){
 				Context.translate(-entities[i].size[0]/2, -entities[i].size[1]);
 				entities[i].draw(Context);
 				entities[i].drawWeapon();
-				Context.restore();
-			}else if(entities[i].type === 'projectile'){
-				Context.save();
-				Context.globalAlpha = entities[i].alpha;
+			}else if(entities[i].type == 'projectile'){
+				if(entities[i].dying){
+					Context.globalAlpha = entities[i].alpha;
+				}
 				Context.translate(entities[i].currentPos[0], entities[i].currentPos[1]);
 				Context.rotate(entities[i].rot);
 				Context.translate(-entities[i].size[0]/2, -entities[i].size[1]/2);
 				entities[i].draw(Context);					
-				Context.restore();
-
-				//Context.fillRect(entities[x][i].point[0] - 3, entities[x][i].point[1] - 3, 6, 6);
-				//makeCross(entities[x][i].point[0], entities[x][i].point[1])
-
-				//makeCross(entities[x][i].currentPos[0], entities[x][i].currentPos[1]);
+			}else if(entities[i].type == 'structure'){
+				Context.translate(entities[i].currentPos[0], entities[i].currentPos[1]);
+				Context.translate(-entities[i].size[0]/2, -entities[i].size[1]);
+				entities[i].draw(Context);
 			}
+			Context.setTransform(1,0,0,1,0,0);
+			Context.globalAlpha = 1;
 		}
 	}
 
@@ -233,7 +243,6 @@ function renderBg(){
 
 	this.generateLvl = function(){
 
-		var structurePos = [];
 		this.slopePath = [];	
 
 		Context.fillStyle = '#00cee0';
@@ -267,19 +276,16 @@ function generateLandscape(maxSteepness, stepSize, maxHeigth, minHeigth, colour,
 	const pathHeigth = 75;
 	
 	var attitude = (Math.random() * (minHeigth - maxHeigth)) + maxHeigth,
-		slope =  (Math.random() * maxSteepness) * 2 - maxSteepness;
+		slope =  (Math.random() * maxSteepness) * 2 - maxSteepness,
+		buldingCounter = 4;
 	
 	Context.fillStyle = colour;
 	Context.beginPath();
 	Context.moveTo(0, Canvas.height);
 	Context.lineTo(0, attitude);
 	
-	for(var i = -30; i <= 0; i++){
-		game.renderBg.slopePath.push([i, attitude + pathHeigth]);
-	}
+	for(var x = 0; x <= Canvas.width; x++){
 
-	for(var x = 1; x <= Canvas.width + 30; x++){
-			
 		game.renderBg.slopePath.push([x, attitude + pathHeigth]);
 
 		attitude += slope;
@@ -300,6 +306,11 @@ function generateLandscape(maxSteepness, stepSize, maxHeigth, minHeigth, colour,
 		}	
 
 		Context.lineTo(x, attitude);
+		
+		if(pushPath && x > Canvas.width/3 && Math.random() < 0.003 && x < Canvas.width - Canvas.width/10 && buldingCounter > 0){
+			game.allEntities.buildStructure('hut', game.structureStats.hut, [x, Math.random()*(Canvas.height*7/8 - game.renderBg.slopePath[x][1]) + game.renderBg.slopePath[x][1]]);
+			buldingCounter--;
+		}
 
 	}
 	
@@ -331,22 +342,28 @@ function generateLandscape(maxSteepness, stepSize, maxHeigth, minHeigth, colour,
 function Game(){
 	
 	this.init = function(){
-	
+		window.isDrag = false;
+		window.startSelect = [0,0];
+		
 		this.renderBg = new renderBg();
-		this.renderBg.generateLvl();
 	
 		this.handleUI = new handleUI();
 		this.allEntities = new allEntities();
 		this.unitStats = new unitStats();
-		
+		this.structureStats = new structureStats();
+		this.soundFX = new soundFX();
+
 		this.handleUI.init();
-	
+		this.soundFX.init();
+
 		themMonks = [this.unitStats.monk, this.unitStats.bowMan, this.unitStats.guardsMan, this.unitStats.crusader, this.unitStats.zealot];
 		themVikings = [this.unitStats.axeViking, this.unitStats.spearViking, this.unitStats.bowViking, this.unitStats.bearserker, this.unitStats.swordViking, this.unitStats.valkyrie];
 		
+		this.renderBg.generateLvl();
+		
 		main();
 	};
-
+	
 }
 
 var game = new Game();

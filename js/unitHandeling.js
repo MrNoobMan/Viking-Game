@@ -8,9 +8,11 @@ function allEntities(){
 	this.enemyProjectiles = [];
 	this.dyingUnits = [];
 	this.bloodDrops = [];
+	this.structures = [];
+	this.selectedUnits = [];
 
 	this.spawn = function(unitType, unitParams){
-		if(unitType === 'player'){
+		if(unitType == 'player'){
 			var viking = new Sprite(unitParams[0]);
 				viking.ai = new basicAi(unitParams[1]);
 				viking.id = makeId('#VK' + this.playerUnits.length.toString(16));
@@ -19,13 +21,13 @@ function allEntities(){
 				viking.spawn([0,0]);
 			this.playerUnits.push(viking);
 			this.aliveUnits.push(viking);
-		}else if(unitType === 'monk'){
+		}else if(unitType == 'monk'){
 			var monk = new Sprite(unitParams[0]);
 				monk.ai = new basicAi(unitParams[1]);
 				monk.id = makeId('#MK' + this.enemyUnits.length.toString(16));
 				monk.walkDir = unitParams[1][5];
 				monk.weaponRot = unitParams[1][0][0];
-				monk.spawn(game.renderBg.slopePath[game.renderBg.slopePath.length-1]);
+				monk.spawn([0,0]);
 			this.enemyUnits.push(monk);
 			this.aliveUnits.push(monk);
 		}
@@ -37,7 +39,7 @@ function allEntities(){
 				arrow.ai = new arrowAi(pos[0], pos[1], arrow.size);
 				arrow.dmg = dmg;
 				arrow.id = makeId('#PA' + this.playerProjectiles.length.toString(16));
-				arrow.spawn(pos[0], [1]);
+				arrow.spawn(pos[0], pos[1]);
 			this.playerProjectiles.push(arrow);
 			this.aliveUnits.push(arrow);
 		}else if(projType === 'enemyArrow'){
@@ -48,6 +50,17 @@ function allEntities(){
 				arrow.spawn(pos[0], pos[1]);
 			this.enemyProjectiles.push(arrow);
 			this.aliveUnits.push(arrow);
+		}
+	}
+
+	this.buildStructure = function(strucType, strucParams, pos){
+		if(strucType == 'hut'){
+			var structure = new Structure(strucParams);
+				structure.spawn(pos);
+			this.structures.push(structure);
+			this.aliveUnits.push(structure);
+		}else if(strucType == 'tower'){
+			
 		}
 	}
 
@@ -103,7 +116,7 @@ function unitStats(){
 					[[[155,0], [20,20], false], [[23,17],[7, 12], [[-7, 12], 10.5], true]],	//weapon - [framPos, size]
 					6,					//dmg
 					100],
-					[[PIby8, PIby2-PIby8], [[-2, -20], [8, -15]], 4, 25, [450, 'shootBow'], 1, 0, true],
+					[[PIby8, PIby2-PIby8], [[-2, -20], [8, -15]], 4, 10, [450, 'shootBow'], 1, 0, true],
 					4,
 					1250
 	];
@@ -152,7 +165,7 @@ function unitStats(){
 						1,
 						0
 	];
-	
+
 	this.valkyrie = [[imageRepo.imgs[1],	//img
 					[13,30],			//size
 					[82,0],				//framPos
@@ -167,7 +180,7 @@ function unitStats(){
 					1,
 					0
 	];
-	
+
 	this.monk = [[imageRepo.imgs[3],
 				[11, 28],
 				[0, 0],
@@ -178,7 +191,7 @@ function unitStats(){
 				[[[0, 44], [25,25], false]],
 				8,
 				50],
-				[[Math.PI+PIby4, Math.PI+PIby4+PIby8], [[10, 5], [15, 20]], 3, 25, [55, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false] 
+				[[Math.PI+PIby4, Math.PI+PIby4+PIby8], [[10, 5], [15, 10]], 3, 25, [55, 'stabWeapon'], -1, Canvas.width, false] 
 	];
 
 	this.guardsMan = [[imageRepo.imgs[3],
@@ -191,7 +204,7 @@ function unitStats(){
 				[[[22,0], [30,30], false], [[12,17],[8, 8], [[13.5, -1.5], 19.5], false]],
 				10,
 				50],
-				[[Math.PI+PIby4-PIby10, Math.PI+PIby4+PIby12], [[-20, 5], [-5, 15]], 2, 25, [65, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false] 
+				[[Math.PI+PIby4-PIby10, Math.PI+PIby4+PIby12], [[-20, 5], [-5, 15]], 2, 25, [65, 'stabWeapon'], -1, Canvas.width, false] 
 	];
 	
 	this.zealot = [[imageRepo.imgs[3],
@@ -204,7 +217,7 @@ function unitStats(){
 				[[[59, 44], [30,30], false]],
 				12,
 				65],
-				[[PI2-PI3by4, PI2-PIby2], [[1, 1], [5, 15]], 2.5, 30, [60, 'stabWeapon'], -1, game.renderBg.slopePath.length-1, false]
+				[[PI2-PI3by4, PI2-PIby2], [[1, 1], [5, 15]], 2.5, 30, [60, 'stabWeapon'], -1, Canvas.width, false]
 	];
 
 	this.crusader = [[imageRepo.imgs[3],
@@ -217,7 +230,7 @@ function unitStats(){
 				[[[30, 44], [23,23], false], [[0,16],[9, 14], [[7, -5], 18], false]],
 				10,
 				50],
-				[[Math.PI+PIby8, PI2-PIby2], [[10, -10],[15, -5]], 3, 25, [50, 'slashWeapon'], -1, game.renderBg.slopePath.length-1, false] 
+				[[Math.PI+PIby8, PI2-PIby2], [[10, -10],[15, -5]], 3, 25, [50, 'slashWeapon'], -1, Canvas.width, false] 
 	];
 	
 	this.bowMan = [[imageRepo.imgs[3],	//img
@@ -230,7 +243,7 @@ function unitStats(){
 					[[[155,0], [20,20], false], [[23,17],[7, 12], [[-6.3, 13.5], 13.5], true]],	//weapon - [framPos, size]
 					6,					//dmg
 					50],
-					[[PIby8, PIby2-PIby8], [[-2, -20], [8, -15]], 4, 25, [450, 'shootBow'], -1, game.renderBg.slopePath.length-1, false]
+					[[PIby8, PIby2-PIby8], [[-2, -20], [8, -15]], 4, 10, [450, 'shootBow'], -1, Canvas.width, false]
 	];
 
 	this.friendlyArrow = [imageRepo.imgs[2],
@@ -254,17 +267,44 @@ function unitStats(){
 				[[]],
 				1,
 				1];
-};
+}
+
+function structureStats(){
+	
+	this.hut = [imageRepo.imgs[0],
+		[0,0],			//framPos
+		[72, 56],		//frameSize
+		250,			//maxHP
+		500				//lootz
+	];
+	
+	this.tower = [imageRepo.imgs[0],
+		
+	];
+	
+}
 
 function removeDead(unit){
 	return unit.alive;
+}
+
+function findSelected(unit){
+	if(unit.alive && unit.currentHealth > 0 &&
+		unit.currentPos[0] - unit.size[0]/2 > game.handleUI.selectionRect[0] &&
+		unit.currentPos[0] + unit.size[0]/2 < game.handleUI.selectionRect[0] + game.handleUI.selectionRect[2] &&
+		unit.currentPos[1] < game.handleUI.selectionRect[1] + game.handleUI.selectionRect[3] &&
+		unit.currentPos[1] - unit.size[1] > game.handleUI.selectionRect[1]
+		){
+	unit.ai.selected = true;
+	return;
+	}
 }
 
 function makeId(prefix){
 	
     var id = prefix + '',
 		possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	if(id.length === 4){
+	if(id.length == 4){
 		id += '0';
 	}
     for( var i = 0; i < 8; i++){

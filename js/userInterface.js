@@ -4,6 +4,7 @@ function handleUI(){
 		debugTimer = 0;
 	
 	this.unitBarPos = defaultUnitBarPos;
+	this.selectionRect = [0,0,0,0]; //x, y, h, w
 	
 	this.init = function(){
 		
@@ -43,7 +44,7 @@ function handleUI(){
 
 		debugTimer += dt;
 		
-		if(mousePos[1] >= this.unitBarPos && this.unitBarPos >= Canvas.height - 150){
+		if(!window.isDrag && mousePos[1] >= this.unitBarPos && this.unitBarPos >= Canvas.height - 150){
 			this.unitBarPos -= 300 * dt;
 		}else if(mousePos[1] < this.unitBarPos && this.unitBarPos < defaultUnitBarPos){
 			this.unitBarPos += 300 * dt;
@@ -54,7 +55,11 @@ function handleUI(){
 				this.buttons[i].spawnUnit();
 			}
 		}
-
+		
+		if(window.isDrag){
+			this.selectionRect = [Math.min(mousePos[0], window.startSelect[0]), Math.min(mousePos[1], window.startSelect[1]), Math.abs(window.startSelect[0] - mousePos[0]), Math.abs(window.startSelect[1] - mousePos[1])];
+		}
+		
 		if(debugMode && debugTimer > .25){
 			if(KEY_STATUS.a){
 				game.allEntities.spawn('player', game.unitStats.axeViking);
@@ -111,6 +116,10 @@ function handleUI(){
 			this.buttons[i].draw(dt);
 		}
 		Context.restore();
+		
+		if(window.isDrag){
+			Context.strokeRect(this.selectionRect[0], this.selectionRect[1], this.selectionRect[2], this.selectionRect[3]);
+		}
 	};
 	
 	this.checkBox = function(){
@@ -121,7 +130,7 @@ function handleUI(){
 			}
 		}
 	};
-		
+			
 };
 
 function uIBox(size, unitParams, pos, timer){
@@ -172,7 +181,8 @@ function uIBox(size, unitParams, pos, timer){
 	
 	this.spawnUnit = function(){
 		var counter = 0;
-		if(this.currentTimer <= 0 && !this.onCD){
+		if(this.currentTimer <= 0 && !this.onCD && money >= this.unitParams[0][9]){
+			money -= this.unitParams[0][9];
 			var spawnEm = setInterval(function(){
 				window['game']['allEntities']['spawn']('player', unitParams);
 				counter++;
